@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<!--
+
+    Copyright © 2017 Jeremy Custenborder (jcustenborder@gmail.com)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.github.jcustenborder.kafka.connect</groupId>
+    <artifactId>kafka-connect-parent</artifactId>
+    <version>0.11.0.0-cp2</version>
+  </parent>
+  <artifactId>kafka-connect-transform-common</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <name>kafka-connect-transform-cef</name>
+  <url>https://github.com/jcustenborder/kafka-connect-transform-common</url>
+  <inceptionYear>2017</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache License 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Jeremy Custenborder</name>
+      <email>jeremy@confluent.io</email>
+      <url>https://github.com/jcustenborder</url>
+      <roles>
+        <role>maintainer</role>
+      </roles>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/jcustenborder/kafka-connect-transform-cef.git</connection>
+    <developerConnection>scm:git:git@github.com:jcustenborder/kafka-connect-transform-cef.git</developerConnection>
+    <url>https://github.com/jcustenborder/kafka-connect-transform-cef</url>
+  </scm>
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/jcustenborder/kafka-connect-transform-cef/issues</url>
+  </issueManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.9.10</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jcustenborder.kafka.connect</groupId>
+      <artifactId>connect-utils-testing-data</artifactId>
+      <version>[0.2.33,0.2.1000)</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
