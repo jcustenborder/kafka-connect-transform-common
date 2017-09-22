@@ -22,6 +22,7 @@ import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.transforms.Transformation;
@@ -29,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 
@@ -52,10 +54,9 @@ public abstract class PatternRename<R extends ConnectRecord<R>> implements Trans
 
   }
 
-
-  R process(R record, boolean isKey) {
-    final Schema inputSchema = isKey ? record.keySchema() : record.valueSchema();
-    final Struct inputStruct = (Struct) (isKey ? record.key() : record.value());
+  SchemaAndValue processStruct(R record, SchemaAndValue schemaAndValue) {
+    final Schema inputSchema = schemaAndValue.schema();
+    final Struct inputStruct = (Struct) schemaAndValue.value();
     final SchemaBuilder outputSchemaBuilder = SchemaBuilder.struct();
     outputSchemaBuilder.name(inputSchema.name());
     outputSchemaBuilder.doc(inputSchema.doc());
@@ -90,33 +91,106 @@ public abstract class PatternRename<R extends ConnectRecord<R>> implements Trans
       final Object value = inputStruct.get(inputField);
       outputStruct.put(outputField, value);
     }
+    return new SchemaAndValue(outputSchema, outputStruct);
+  }
 
-    final R result;
-    if (isKey) {
-      result = record.newRecord(
-          record.topic(),
-          record.kafkaPartition(),
-          outputSchema,
-          outputStruct,
-          record.valueSchema(),
-          record.value(),
-          record.timestamp()
-      );
+  SchemaAndValue processMap(R record, SchemaAndValue schemaAndValue) {
+    final Map<String, Object> inputMap = (Map<String, Object>) schemaAndValue.value();
+    final Map<String, Object> outputMap = new LinkedHashMap<>(inputMap.size());
+
+    for (final String inputFieldName : inputMap.keySet()) {
+      log.trace("process() - Processing field '{}'", inputFieldName);
+      final Matcher fieldMatcher = this.config.pattern.matcher(inputFieldName);
+      final String outputFieldName;
+      if (fieldMatcher.find()) {
+        outputFieldName = fieldMatcher.replaceAll(this.config.replacement);
+      } else {
+        outputFieldName = inputFieldName;
+      }
+      final Object value = inputMap.get(inputFieldName);
+      outputMap.put(outputFieldName, value);
+    }
+
+    return new SchemaAndValue(null, outputMap);
+  }
+
+  SchemaAndValue process(R record, SchemaAndValue schemaAndValue) {
+    final SchemaAndValue result;
+    if (schemaAndValue.value() instanceof Struct) {
+      result = processStruct(record, schemaAndValue);
+    } else if (schemaAndValue.value() instanceof Map) {
+      result = processMap(record, schemaAndValue);
     } else {
-      result = record.newRecord(
-          record.topic(),
-          record.kafkaPartition(),
-          record.keySchema(),
-          record.key(),
-          outputSchema,
-          outputStruct,
-          record.timestamp()
-      );
+      throw new UnsupportedOperationException();
     }
     return result;
-
-
   }
+
+
+//  R process(R record, boolean isKey) {
+//    final Schema inputSchema = isKey ? record.keySchema() : record.valueSchema();
+//    final Struct inputStruct = (Struct) (isKey ? record.key() : record.value());
+//    final SchemaBuilder outputSchemaBuilder = SchemaBuilder.struct();
+//    outputSchemaBuilder.name(inputSchema.name());
+//    outputSchemaBuilder.doc(inputSchema.doc());
+//    if (null != inputSchema.defaultValue()) {
+//      outputSchemaBuilder.defaultValue(inputSchema.defaultValue());
+//    }
+//    if (null != inputSchema.parameters() && !inputSchema.parameters().isEmpty()) {
+//      outputSchemaBuilder.parameters(inputSchema.parameters());
+//    }
+//    if (inputSchema.isOptional()) {
+//      outputSchemaBuilder.optional();
+//    }
+//    Map<String, String> fieldMappings = new HashMap<>(inputSchema.fields().size());
+//    for (final Field inputField : inputSchema.fields()) {
+//      log.trace("process() - Processing field '{}'", inputField.name());
+//      final Matcher fieldMatcher = this.config.pattern.matcher(inputField.name());
+//      final String outputFieldName;
+//      if (fieldMatcher.find()) {
+//        outputFieldName = fieldMatcher.replaceAll(this.config.replacement);
+//      } else {
+//        outputFieldName = inputField.name();
+//      }
+//      log.trace("process() - Mapping field '{}' to '{}'", inputField.name(), outputFieldName);
+//      fieldMappings.put(inputField.name(), outputFieldName);
+//      outputSchemaBuilder.field(outputFieldName, inputField.schema());
+//    }
+//    final Schema outputSchema = outputSchemaBuilder.build();
+//    final Struct outputStruct = new Struct(outputSchema);
+//    for (Map.Entry<String, String> entry : fieldMappings.entrySet()) {
+//      final String inputField = entry.getKey(), outputField = entry.getValue();
+//      log.trace("process() - Copying '{}' to '{}'", inputField, outputField);
+//      final Object value = inputStruct.get(inputField);
+//      outputStruct.put(outputField, value);
+//    }
+//
+//    final R result;
+//    if (isKey) {
+//      result = record.newRecord(
+//          record.topic(),
+//          record.kafkaPartition(),
+//          outputSchema,
+//          outputStruct,
+//          record.valueSchema(),
+//          record.value(),
+//          record.timestamp()
+//      );
+//    } else {
+//      result = record.newRecord(
+//          record.topic(),
+//          record.kafkaPartition(),
+//          record.keySchema(),
+//          record.key(),
+//          outputSchema,
+//          outputStruct,
+//          record.timestamp()
+//      );
+//    }
+//    return result;
+//
+//
+//  }
 
   @Title("PatternRename(Key)")
   @Description("This transformation is used to rename fields in the key of an input struct based on a regular expression and a replacement string.")
@@ -125,7 +199,17 @@ public abstract class PatternRename<R extends ConnectRecord<R>> implements Trans
 
     @Override
     public R apply(R r) {
-      return process(r, true);
+      final SchemaAndValue transformed = process(r, new SchemaAndValue(r.keySchema(), r.key()));
+
+      return r.newRecord(
+          r.topic(),
+          r.kafkaPartition(),
+          transformed.schema(),
+          transformed.value(),
+          r.valueSchema(),
+          r.value(),
+          r.timestamp()
+      );
     }
   }
 
@@ -134,7 +218,17 @@ public abstract class PatternRename<R extends ConnectRecord<R>> implements Trans
   public static class Value<R extends ConnectRecord<R>> extends PatternRename<R> {
     @Override
     public R apply(R r) {
-      return process(r, false);
+      final SchemaAndValue transformed = process(r, new SchemaAndValue(r.valueSchema(), r.value()));
+
+      return r.newRecord(
+          r.topic(),
+          r.kafkaPartition(),
+          r.keySchema(),
+          r.key(),
+          transformed.schema(),
+          transformed.value(),
+          r.timestamp()
+      );
     }
   }
 }

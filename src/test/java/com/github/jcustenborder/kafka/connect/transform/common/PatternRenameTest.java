@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,12 +25,17 @@ import org.apache.kafka.connect.transforms.Transformation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
+import static com.github.jcustenborder.kafka.connect.transform.common.GenericAssertions.assertMap;
 import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public abstract class PatternRenameTest<R extends ConnectRecord<R>> {
   final boolean isKey;
+  final static String TOPIC = "test";
+
 
   protected PatternRenameTest(boolean isKey) {
     this.isKey = isKey;
@@ -45,8 +50,47 @@ public abstract class PatternRenameTest<R extends ConnectRecord<R>> {
     this.transformation = create();
   }
 
+
   @Test
-  public void stripDots() {
+  public void schemaLess() {
+    this.transformation.configure(
+        ImmutableMap.of(
+            PatternRenameConfig.FIELD_PATTERN_CONF, "\\.",
+            PatternRenameConfig.FIELD_REPLACEMENT_CONF, "_"
+        )
+    );
+
+    final Map<String, Object> input = ImmutableMap.of(
+        "first.name", "example",
+        "last.name", "user"
+    );
+    final Map<String, Object> expected = ImmutableMap.of(
+        "first_name", "example",
+        "last_name", "user"
+    );
+
+    final Object key = isKey ? input : null;
+    final Object value = isKey ? null : input;
+    final Schema keySchema = null;
+    final Schema valueSchema = null;
+
+    final SinkRecord inputRecord = new SinkRecord(
+        TOPIC,
+        1,
+        keySchema,
+        key,
+        valueSchema,
+        value,
+        1234L
+    );
+    final SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertNotNull(outputRecord);
+    final Map<String, Object> actual = (Map<String, Object>) (isKey ? outputRecord.key() : outputRecord.value());
+    assertMap(expected, actual, "");
+  }
+
+  @Test
+  public void prefixed() {
     this.transformation.configure(
         ImmutableMap.of(
             PatternRenameConfig.FIELD_PATTERN_CONF, "^prefixed",
@@ -62,14 +106,13 @@ public abstract class PatternRenameTest<R extends ConnectRecord<R>> {
         .put("prefixedfirstname", "example")
         .put("prefixedlastname", "user");
 
-    final String topic = "test";
     final Object key = isKey ? inputStruct : null;
     final Object value = isKey ? null : inputStruct;
     final Schema keySchema = isKey ? inputSchema : null;
     final Schema valueSchema = isKey ? null : inputSchema;
 
     final SinkRecord inputRecord = new SinkRecord(
-        topic,
+        TOPIC,
         1,
         keySchema,
         key,
