@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.github.jcustenborder.kafka.connect</groupId>
     <artifactId>kafka-connect-parent</artifactId>
-    <version>0.11.0.0-cp3</version>
+    <version>0.11.0.0-cp4</version>
   </parent>
   <artifactId>kafka-connect-transform-common</artifactId>
   <version>0.1.0-SNAPSHOT</version>
