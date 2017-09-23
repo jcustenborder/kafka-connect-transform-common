@@ -65,7 +65,7 @@
     <dependency>
       <groupId>com.github.jcustenborder.kafka.connect</groupId>
       <artifactId>connect-utils-testing-data</artifactId>
-      <version>[0.2.33,0.2.1000)</version>
+      <version>[0.3.33,0.3.1000)</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
