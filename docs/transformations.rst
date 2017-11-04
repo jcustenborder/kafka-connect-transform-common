@@ -19,3 +19,4 @@ The Common Transforms project is a collection of common transformations that can
     :hidden:
 
     schemas
+    info
