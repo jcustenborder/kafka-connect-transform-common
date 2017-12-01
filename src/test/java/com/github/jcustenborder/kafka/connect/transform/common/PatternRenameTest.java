@@ -22,7 +22,6 @@ import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.transforms.Transformation;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -32,24 +31,12 @@ import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSc
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public abstract class PatternRenameTest<R extends ConnectRecord<R>> {
-  final boolean isKey;
+public abstract class PatternRenameTest extends TransformationTest {
   final static String TOPIC = "test";
 
-
   protected PatternRenameTest(boolean isKey) {
-    this.isKey = isKey;
+    super(isKey);
   }
-
-  protected abstract Transformation<SinkRecord> create();
-
-  Transformation<SinkRecord> transformation;
-
-  @BeforeEach
-  public void before() {
-    this.transformation = create();
-  }
-
 
   @Test
   public void schemaLess() {
@@ -138,7 +125,7 @@ public abstract class PatternRenameTest<R extends ConnectRecord<R>> {
     assertStruct(expectedStruct, actualStruct);
   }
 
-  public static class KeyTest<R extends ConnectRecord<R>> extends PatternRenameTest<R> {
+  public static class KeyTest<R extends ConnectRecord<R>> extends PatternRenameTest {
     protected KeyTest() {
       super(true);
     }
@@ -149,7 +136,7 @@ public abstract class PatternRenameTest<R extends ConnectRecord<R>> {
     }
   }
 
-  public static class ValueTest<R extends ConnectRecord<R>> extends PatternRenameTest<R> {
+  public static class ValueTest<R extends ConnectRecord<R>> extends PatternRenameTest {
     protected ValueTest() {
       super(false);
     }
