@@ -4,6 +4,80 @@ This project provides some common transformation functionality for Kafka Connect
 
 # Transformations
 
+## ChangeCase(Key)
+
+This transformation is used to change the case of fields in an input struct.
+
+### Configuration
+
+| Name | Type   | Importance | Default Value | Validator                                                                                                        | Documentation           |
+| ---- | ------ | ---------- | ------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------|
+| from | String | High       |               | ValidEnum{enum=CaseFormat, allowed=[LOWER_HYPHEN, LOWER_UNDERSCORE, LOWER_CAMEL, UPPER_CAMEL, UPPER_UNDERSCORE]} | The format to move from |
+| to   | String | High       |               | ValidEnum{enum=CaseFormat, allowed=[LOWER_HYPHEN, LOWER_UNDERSCORE, LOWER_CAMEL, UPPER_CAMEL, UPPER_UNDERSCORE]} |                         |
+
+
+#### Standalone Example
+
+```properties
+transforms=Key
+transforms.Key.type=com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Key
+# The following values must be configured.
+transforms.Key.from=
+transforms.Key.to=
+```
+
+#### Distributed Example
+
+```json
+{
+"name": "connector1",
+    "config": {
+        "connector.class": "com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Key",
+        "transforms": "Key",
+        "transforms.Key.type": "com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Key",
+        "transforms.Key.from":"",
+        "transforms.Key.to":"",
+    }
+}
+```
+
+## ChangeCase(Value)
+
+This transformation is used to change the case of fields in an input struct.
+
+### Configuration
+
+| Name | Type   | Importance | Default Value | Validator                                                                                                        | Documentation           |
+| ---- | ------ | ---------- | ------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------|
+| from | String | High       |               | ValidEnum{enum=CaseFormat, allowed=[LOWER_HYPHEN, LOWER_UNDERSCORE, LOWER_CAMEL, UPPER_CAMEL, UPPER_UNDERSCORE]} | The format to move from |
+| to   | String | High       |               | ValidEnum{enum=CaseFormat, allowed=[LOWER_HYPHEN, LOWER_UNDERSCORE, LOWER_CAMEL, UPPER_CAMEL, UPPER_UNDERSCORE]} |                         |
+
+
+#### Standalone Example
+
+```properties
+transforms=Value
+transforms.Value.type=com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Value
+# The following values must be configured.
+transforms.Value.from=
+transforms.Value.to=
+```
+
+#### Distributed Example
+
+```json
+{
+"name": "connector1",
+    "config": {
+        "connector.class": "com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Value",
+        "transforms": "Value",
+        "transforms.Value.type": "com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Value",
+        "transforms.Value.from":"",
+        "transforms.Value.to":"",
+    }
+}
+```
+
 ## ExtractNestedField(Key)
 
 This transformation is used to extract a field from a nested struct and append it to the parent struct.
@@ -193,4 +267,3 @@ transforms.Value.field.replacement=
     }
 }
 ```
-
