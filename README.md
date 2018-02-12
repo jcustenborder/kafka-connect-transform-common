@@ -10,11 +10,11 @@ This transformation is used to extract a field from a nested struct and append i
 
 ### Configuration
 
-| Name                   | Type   | Importance | Default Value | Validator | Documentation         |
-| ---------------------- | ------ | ---------- | ------------- | --------- | ----------------------|
-| input.inner.field.name | String | High       |               |           | input.inner.field.name|
-| input.outer.field.name | String | High       |               |           | input.outer.field.name|
-| output.field.name      | String | High       |               |           | output.field.name     |
+| Name                   | Type   | Importance | Default Value | Validator | Documentation                                                                                                                                   |
+| ---------------------- | ------ | ---------- | ------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------|
+| input.inner.field.name | String | High       |               |           | The field on the child struct containing the field to be extracted. For example if you wanted the extract `address.state` you would use `state`.|
+| input.outer.field.name | String | High       |               |           | The field on the parent struct containing the child struct. For example if you wanted the extract `address.state` you would use `address`.      |
+| output.field.name      | String | High       |               |           | The field to place the extracted value into.                                                                                                    |
 
 
 #### Standalone Example
@@ -50,11 +50,11 @@ This transformation is used to extract a field from a nested struct and append i
 
 ### Configuration
 
-| Name                   | Type   | Importance | Default Value | Validator | Documentation         |
-| ---------------------- | ------ | ---------- | ------------- | --------- | ----------------------|
-| input.inner.field.name | String | High       |               |           | input.inner.field.name|
-| input.outer.field.name | String | High       |               |           | input.outer.field.name|
-| output.field.name      | String | High       |               |           | output.field.name     |
+| Name                   | Type   | Importance | Default Value | Validator | Documentation                                                                                                                                   |
+| ---------------------- | ------ | ---------- | ------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------|
+| input.inner.field.name | String | High       |               |           | The field on the child struct containing the field to be extracted. For example if you wanted the extract `address.state` you would use `state`.|
+| input.outer.field.name | String | High       |               |           | The field on the parent struct containing the child struct. For example if you wanted the extract `address.state` you would use `address`.      |
+| output.field.name      | String | High       |               |           | The field to place the extracted value into.                                                                                                    |
 
 
 #### Standalone Example

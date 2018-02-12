@@ -33,11 +33,13 @@ public class ExtractNestedFieldConfig extends AbstractConfig {
   }
 
   public static final String OUTER_FIELD_NAME_CONF = "input.outer.field.name";
-  static final String OUTER_FIELD_NAME_DOC = "input.outer.field.name";
+  static final String OUTER_FIELD_NAME_DOC = "The field on the parent struct containing the child struct. " +
+      "For example if you wanted the extract `address.state` you would use `address`.";
   public static final String INNER_FIELD_NAME_CONF = "input.inner.field.name";
-  static final String INNER_FIELD_NAME_DOC = "input.inner.field.name";
+  static final String INNER_FIELD_NAME_DOC = "The field on the child struct containing the field to be extracted. " +
+      "For example if you wanted the extract `address.state` you would use `state`.";
   public static final String OUTPUT_FIELD_NAME_CONF = "output.field.name";
-  static final String OUTPUT_FIELD_NAME_DOC = "output.field.name";
+  static final String OUTPUT_FIELD_NAME_DOC = "The field to place the extracted value into.";
 
   public static ConfigDef config() {
     return new ConfigDef()
