@@ -267,3 +267,70 @@ transforms.Value.field.replacement=
     }
 }
 ```
+
+## ToJson(Key)
+
+This transformation is used to take structured data such as AVRO and output it as JSON by way of the JsonConverter built into Kafka Connect.
+
+### Configuration
+
+| Name               | Type    | Importance | Default Value | Validator       | Documentation                                                |
+| ------------------ | ------- | ---------- | ------------- | --------------- | -------------------------------------------------------------|
+| output.schema.type | String  | Medium     | STRING        | [STRING, BYTES] | The connect schema type to output the converted JSON as.     |
+| schemas.enable     | Boolean | Medium     | false         |                 | Flag to determine if the JSON data should include the schema.|
+
+
+#### Standalone Example
+
+```properties
+transforms=Key
+transforms.Key.type=com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Key
+# The following values must be configured.
+```
+
+#### Distributed Example
+
+```json
+{
+"name": "connector1",
+    "config": {
+        "connector.class": "com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Key",
+        "transforms": "Key",
+        "transforms.Key.type": "com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Key",
+    }
+}
+```
+
+## ToJson(Value)
+
+This transformation is used to take structured data such as AVRO and output it as JSON by way of the JsonConverter built into Kafka Connect.
+
+### Configuration
+
+| Name               | Type    | Importance | Default Value | Validator       | Documentation                                                |
+| ------------------ | ------- | ---------- | ------------- | --------------- | -------------------------------------------------------------|
+| output.schema.type | String  | Medium     | STRING        | [STRING, BYTES] | The connect schema type to output the converted JSON as.     |
+| schemas.enable     | Boolean | Medium     | false         |                 | Flag to determine if the JSON data should include the schema.|
+
+
+#### Standalone Example
+
+```properties
+transforms=Value
+transforms.Value.type=com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Value
+# The following values must be configured.
+```
+
+#### Distributed Example
+
+```json
+{
+"name": "connector1",
+    "config": {
+        "connector.class": "com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Value",
+        "transforms": "Value",
+        "transforms.Value.type": "com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Value",
+    }
+}
+```
+
