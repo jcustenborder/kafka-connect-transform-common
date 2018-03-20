@@ -32,13 +32,19 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class ExtractNestedField<R extends ConnectRecord<R>> extends BaseTransformation<R> {
-  private static final Logger log = LoggerFactory.getLogger(ExtractNestedField.class);
-
+public abstract class BytesToString<R extends ConnectRecord<R>> extends BaseTransformation<R> {
+  private static final Logger log = LoggerFactory.getLogger(BytesToString.class);
 
   @Override
   public ConfigDef config() {
-    return ExtractNestedFieldConfig.config();
+    return BytesToStringConfig.config();
+  }
+
+  BytesToStringConfig config;
+
+  @Override
+  public void configure(Map<String, ?> settings) {
+    this.config = new BytesToStringConfig(settings);
   }
 
   @Override
@@ -46,21 +52,18 @@ public abstract class ExtractNestedField<R extends ConnectRecord<R>> extends Bas
 
   }
 
-  ExtractNestedFieldConfig config;
-  Map<Schema, Schema> schemaCache;
-
   @Override
-  public void configure(Map<String, ?> map) {
-    this.config = new ExtractNestedFieldConfig(map);
-    this.schemaCache = new HashMap<>();
+  protected SchemaAndValue processBytes(R record, Schema inputSchema, byte[] input) {
+    final Schema outputSchema = inputSchema.isOptional() ? Schema.OPTIONAL_STRING_SCHEMA : Schema.STRING_SCHEMA;
+    final String output = new String(input, this.config.charset);
+    return new SchemaAndValue(outputSchema, output);
   }
+
+  Map<Schema, Schema> schemaCache = new HashMap<>();
 
   @Override
   protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
-    final Struct innerStruct = input.getStruct(this.config.outerFieldName);
-    final Schema outputSchema = this.schemaCache.computeIfAbsent(inputSchema, s -> {
-
-      final Field innerField = innerStruct.schema().field(this.config.innerFieldName);
+    final Schema schema = this.schemaCache.computeIfAbsent(inputSchema, s -> {
       final SchemaBuilder builder = SchemaBuilder.struct();
       if (!Strings.isNullOrEmpty(inputSchema.name())) {
         builder.name(inputSchema.name());
@@ -68,30 +71,38 @@ public abstract class ExtractNestedField<R extends ConnectRecord<R>> extends Bas
       if (inputSchema.isOptional()) {
         builder.optional();
       }
-      for (Field inputField : inputSchema.fields()) {
-        builder.field(inputField.name(), inputField.schema());
+
+      for (Field field : inputSchema.fields()) {
+        log.trace("processStruct() - processing '{}'", field.name());
+        final Schema fieldSchema;
+        if (this.config.fields.contains(field.name())) {
+          fieldSchema = field.schema().isOptional() ?
+              Schema.OPTIONAL_STRING_SCHEMA :
+              Schema.STRING_SCHEMA;
+        } else {
+          fieldSchema = field.schema();
+        }
+        builder.field(field.name(), fieldSchema);
       }
-      builder.field(this.config.innerFieldName, innerField.schema());
       return builder.build();
     });
-    final Struct outputStruct = new Struct(outputSchema);
-    for (Field inputField : inputSchema.fields()) {
-      final Object value = input.get(inputField);
-      outputStruct.put(inputField.name(), value);
+
+    Struct struct = new Struct(schema);
+    for (Field field : schema.fields()) {
+      if (this.config.fields.contains(field.name())) {
+        byte[] buffer = input.getBytes(field.name());
+        struct.put(field.name(), new String(buffer, this.config.charset));
+      } else {
+        struct.put(field.name(), input.get(field.name()));
+      }
     }
-    final Object innerFieldValue = innerStruct.get(this.config.innerFieldName);
-    outputStruct.put(this.config.innerFieldName, innerFieldValue);
-
-    return new SchemaAndValue(outputSchema, outputStruct);
-
+    return new SchemaAndValue(schema, struct);
   }
 
-
-  @Title("ExtractNestedField(Key)")
-  @Description("This transformation is used to extract a field from a nested struct and append it " +
-      "to the parent struct.")
+  @Title("BytesToString(Key)")
+  @Description("This transformation is used to convert a byte array to a string.")
   @DocumentationTip("This transformation is used to manipulate fields in the Key of the record.")
-  public static class Key<R extends ConnectRecord<R>> extends ExtractNestedField<R> {
+  public static class Key<R extends ConnectRecord<R>> extends BytesToString<R> {
 
     @Override
     public R apply(R r) {
@@ -109,11 +120,9 @@ public abstract class ExtractNestedField<R extends ConnectRecord<R>> extends Bas
     }
   }
 
-  @Title("ExtractNestedField(Value)")
-  @Description("This transformation is used to extract a field from a nested struct and append it " +
-      "to the parent struct.")
-  public static class Value<R extends ConnectRecord<R>> extends ExtractNestedField<R> {
-
+  @Title("BytesToString(Value)")
+  @Description("This transformation is used to convert a byte array to a string.")
+  public static class Value<R extends ConnectRecord<R>> extends BytesToString<R> {
     @Override
     public R apply(R r) {
       final SchemaAndValue transformed = process(r, r.valueSchema(), r.value());
@@ -129,5 +138,4 @@ public abstract class ExtractNestedField<R extends ConnectRecord<R>> extends Bas
       );
     }
   }
-
 }

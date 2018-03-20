@@ -66,9 +66,7 @@ public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransfo
   Map<Schema, State> schemaState = new HashMap<>();
 
   @Override
-  protected SchemaAndValue processStruct(R record, SchemaAndValue schemaAndValue) {
-    final Schema inputSchema = schemaAndValue.schema();
-    final Struct inputStruct = (Struct) schemaAndValue.value();
+  protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
     final State state = this.schemaState.computeIfAbsent(inputSchema, schema -> {
       final SchemaBuilder builder = SchemaBuilder.struct();
       if (!Strings.isNullOrEmpty(schema.name())) {
@@ -93,16 +91,11 @@ public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransfo
     final Struct outputStruct = new Struct(state.schema);
 
     for (Map.Entry<String, String> kvp : state.columnMapping.entrySet()) {
-      final Object value = inputStruct.get(kvp.getKey());
+      final Object value = input.get(kvp.getKey());
       outputStruct.put(kvp.getValue(), value);
     }
 
     return new SchemaAndValue(state.schema, outputStruct);
-  }
-
-  @Override
-  protected SchemaAndValue processMap(R record, SchemaAndValue schemaAndValue) {
-    throw new UnsupportedOperationException();
   }
 
   @Title("ChangeCase(Key)")
@@ -112,7 +105,7 @@ public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransfo
 
     @Override
     public R apply(R r) {
-      final SchemaAndValue transformed = process(r, new SchemaAndValue(r.keySchema(), r.key()));
+      final SchemaAndValue transformed = process(r, r.keySchema(), r.key());
 
       return r.newRecord(
           r.topic(),
@@ -132,7 +125,7 @@ public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransfo
 
     @Override
     public R apply(R r) {
-      final SchemaAndValue transformed = process(r, new SchemaAndValue(r.valueSchema(), r.value()));
+      final SchemaAndValue transformed = process(r, r.valueSchema(), r.value());
 
       return r.newRecord(
           r.topic(),

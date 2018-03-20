@@ -54,9 +54,7 @@ public abstract class PatternRename<R extends ConnectRecord<R>> extends BaseTran
   }
 
   @Override
-  protected SchemaAndValue processStruct(R record, SchemaAndValue schemaAndValue) {
-    final Schema inputSchema = schemaAndValue.schema();
-    final Struct inputStruct = (Struct) schemaAndValue.value();
+  protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct inputStruct) {
     final SchemaBuilder outputSchemaBuilder = SchemaBuilder.struct();
     outputSchemaBuilder.name(inputSchema.name());
     outputSchemaBuilder.doc(inputSchema.doc());
@@ -95,11 +93,10 @@ public abstract class PatternRename<R extends ConnectRecord<R>> extends BaseTran
   }
 
   @Override
-  protected SchemaAndValue processMap(R record, SchemaAndValue schemaAndValue) {
-    final Map<String, Object> inputMap = (Map<String, Object>) schemaAndValue.value();
-    final Map<String, Object> outputMap = new LinkedHashMap<>(inputMap.size());
+  protected SchemaAndValue processMap(R record, Map<String, Object> input) {
+    final Map<String, Object> outputMap = new LinkedHashMap<>(input.size());
 
-    for (final String inputFieldName : inputMap.keySet()) {
+    for (final String inputFieldName : input.keySet()) {
       log.trace("process() - Processing field '{}'", inputFieldName);
       final Matcher fieldMatcher = this.config.pattern.matcher(inputFieldName);
       final String outputFieldName;
@@ -108,10 +105,9 @@ public abstract class PatternRename<R extends ConnectRecord<R>> extends BaseTran
       } else {
         outputFieldName = inputFieldName;
       }
-      final Object value = inputMap.get(inputFieldName);
+      final Object value = input.get(inputFieldName);
       outputMap.put(outputFieldName, value);
     }
-
     return new SchemaAndValue(null, outputMap);
   }
 
@@ -122,7 +118,7 @@ public abstract class PatternRename<R extends ConnectRecord<R>> extends BaseTran
 
     @Override
     public R apply(R r) {
-      final SchemaAndValue transformed = process(r, new SchemaAndValue(r.keySchema(), r.key()));
+      final SchemaAndValue transformed = process(r, r.keySchema(), r.key());
 
       return r.newRecord(
           r.topic(),
@@ -141,7 +137,7 @@ public abstract class PatternRename<R extends ConnectRecord<R>> extends BaseTran
   public static class Value<R extends ConnectRecord<R>> extends PatternRename<R> {
     @Override
     public R apply(R r) {
-      final SchemaAndValue transformed = process(r, new SchemaAndValue(r.valueSchema(), r.value()));
+      final SchemaAndValue transformed = process(r, r.valueSchema(), r.value());
 
       return r.newRecord(
           r.topic(),
