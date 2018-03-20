@@ -4,6 +4,72 @@ This project provides some common transformation functionality for Kafka Connect
 
 # Transformations
 
+## BytesToString(Key)
+
+This transformation is used to convert a byte array to a string.
+
+### Configuration
+
+| Name    | Type   | Importance | Default Value | Validator | Documentation                                      |
+| ------- | ------ | ---------- | ------------- | --------- | ---------------------------------------------------|
+| charset | String | High       | UTF-8         |           | The charset to use when creating the output string.|
+| fields  | List   | High       | []            |           | The fields to transform.                           |
+
+
+#### Standalone Example
+
+```properties
+transforms=Key
+transforms.Key.type=com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Key
+# The following values must be configured.
+```
+
+#### Distributed Example
+
+```json
+{
+"name": "connector1",
+    "config": {
+        "connector.class": "com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Key",
+        "transforms": "Key",
+        "transforms.Key.type": "com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Key",
+    }
+}
+```
+
+## BytesToString(Value)
+
+This transformation is used to convert a byte array to a string.
+
+### Configuration
+
+| Name    | Type   | Importance | Default Value | Validator | Documentation                                      |
+| ------- | ------ | ---------- | ------------- | --------- | ---------------------------------------------------|
+| charset | String | High       | UTF-8         |           | The charset to use when creating the output string.|
+| fields  | List   | High       | []            |           | The fields to transform.                           |
+
+
+#### Standalone Example
+
+```properties
+transforms=Value
+transforms.Value.type=com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Value
+# The following values must be configured.
+```
+
+#### Distributed Example
+
+```json
+{
+"name": "connector1",
+    "config": {
+        "connector.class": "com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Value",
+        "transforms": "Value",
+        "transforms.Value.type": "com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Value",
+    }
+}
+```
+
 ## ChangeCase(Key)
 
 This transformation is used to change the case of fields in an input struct.
@@ -333,4 +399,3 @@ transforms.Value.type=com.github.jcustenborder.kafka.connect.transform.common.To
     }
 }
 ```
-
