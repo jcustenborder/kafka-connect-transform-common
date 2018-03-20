@@ -334,6 +334,74 @@ transforms.Value.field.replacement=
 }
 ```
 
+## ToHash(Key)
+
+This transformation will hash the data with the specified algorithm.
+
+### Configuration
+
+| Name                | Type   | Importance | Default Value | Validator                                                                                          | Documentation                                          |
+| ------------------- | ------ | ---------- | ------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------|
+| output.outputSchema | String | High       | STRING        | [STRING, BYTES]                                                                                    | The type of output for the hash.                       |
+| fields              | List   | Medium     | []            |                                                                                                    | The fields to transform.                               |
+| hash.algorithm      | String | Medium     | SHA1          | ValidEnum{enum=HashAlgorithm, allowed=[CRC32, MD5, MURMUR3_32, MURMUR3_128, SHA1, SHA256, SHA512]} | The hash algorithm to use when hashing the input value.|
+
+
+#### Standalone Example
+
+```properties
+transforms=Key
+transforms.Key.type=com.github.jcustenborder.kafka.connect.transform.common.ToHash$Key
+# The following values must be configured.
+```
+
+#### Distributed Example
+
+```json
+{
+"name": "connector1",
+    "config": {
+        "connector.class": "com.github.jcustenborder.kafka.connect.transform.common.ToHash$Key",
+        "transforms": "Key",
+        "transforms.Key.type": "com.github.jcustenborder.kafka.connect.transform.common.ToHash$Key",
+    }
+}
+```
+
+## ToHash(Value)
+
+This transformation will hash the data with the specified algorithm.
+
+### Configuration
+
+| Name                | Type   | Importance | Default Value | Validator                                                                                          | Documentation                                          |
+| ------------------- | ------ | ---------- | ------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------|
+| output.outputSchema | String | High       | STRING        | [STRING, BYTES]                                                                                    | The type of output for the hash.                       |
+| fields              | List   | Medium     | []            |                                                                                                    | The fields to transform.                               |
+| hash.algorithm      | String | Medium     | SHA1          | ValidEnum{enum=HashAlgorithm, allowed=[CRC32, MD5, MURMUR3_32, MURMUR3_128, SHA1, SHA256, SHA512]} | The hash algorithm to use when hashing the input value.|
+
+
+#### Standalone Example
+
+```properties
+transforms=Value
+transforms.Value.type=com.github.jcustenborder.kafka.connect.transform.common.ToHash$Value
+# The following values must be configured.
+```
+
+#### Distributed Example
+
+```json
+{
+"name": "connector1",
+    "config": {
+        "connector.class": "com.github.jcustenborder.kafka.connect.transform.common.ToHash$Value",
+        "transforms": "Value",
+        "transforms.Value.type": "com.github.jcustenborder.kafka.connect.transform.common.ToHash$Value",
+    }
+}
+```
+
 ## ToJson(Key)
 
 This transformation is used to take structured data such as AVRO and output it as JSON by way of the JsonConverter built into Kafka Connect.
