@@ -23,6 +23,7 @@ import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaAndValue;
+import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.json.JsonConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,10 +57,9 @@ public abstract class ToJSON<R extends ConnectRecord<R>> extends BaseTransformat
     this.converter.configure(settingsClone, false);
   }
 
-
   @Override
-  protected SchemaAndValue processStruct(R record, SchemaAndValue schemaAndValue) {
-    final byte[] buffer = this.converter.fromConnectData("dummy", schemaAndValue.schema(), schemaAndValue.value());
+  protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
+    final byte[] buffer = this.converter.fromConnectData("dummy", inputSchema, input);
     final Schema schema;
     final Object value;
 
@@ -85,11 +85,6 @@ public abstract class ToJSON<R extends ConnectRecord<R>> extends BaseTransformat
     return new SchemaAndValue(schema, value);
   }
 
-  @Override
-  protected SchemaAndValue processMap(R record, SchemaAndValue schemaAndValue) {
-    throw new UnsupportedOperationException();
-  }
-
   @Title("ToJson(Key)")
   @Description("This transformation is used to take structured data such as AVRO and output it as " +
       "JSON by way of the JsonConverter built into Kafka Connect.")
@@ -98,7 +93,7 @@ public abstract class ToJSON<R extends ConnectRecord<R>> extends BaseTransformat
 
     @Override
     public R apply(R r) {
-      final SchemaAndValue transformed = process(r, new SchemaAndValue(r.keySchema(), r.key()));
+      final SchemaAndValue transformed = process(r, r.keySchema(), r.key());
 
       return r.newRecord(
           r.topic(),
@@ -119,7 +114,7 @@ public abstract class ToJSON<R extends ConnectRecord<R>> extends BaseTransformat
 
     @Override
     public R apply(R r) {
-      final SchemaAndValue transformed = process(r, new SchemaAndValue(r.valueSchema(), r.value()));
+      final SchemaAndValue transformed = process(r, r.valueSchema(), r.value());
 
       return r.newRecord(
           r.topic(),
