@@ -30,6 +30,7 @@
     <name>kafka-connect-transform-common</name>
     <url>https://github.com/jcustenborder/kafka-connect-transform-common</url>
     <inceptionYear>2017</inceptionYear>
+    <description>Common transformations for Kafka Connect.</description>
     <licenses>
         <license>
             <name>Apache License 2.0</name>
@@ -76,4 +77,40 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-connect-maven-plugin</artifactId>
+                <version>0.9.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>kafka-connect</goal>
+                        </goals>
+                        <configuration>
+                            <ownerUsername>jcustenborder</ownerUsername>
+                            <confluentControlCenterIntegration>true</confluentControlCenterIntegration>
+                            <documentationUrl>
+                                https://jcustenborder.github.io/kafka-connect-documentation/
+                            </documentationUrl>
+                            <ownerName>Jeremy Custenborder</ownerName>
+                            <dockerNamespace>jcustenborder</dockerNamespace>
+                            <dockerName>kafka-connect-docker</dockerName>
+                            <pluginTypes>
+                                <pluginType>transform</pluginType>
+                            </pluginTypes>
+                            <tags>
+                                <tag>Transformation</tag>
+                            </tags>
+                            <title>Common Transformations</title>
+                            <supportUrl>${pom.issueManagement.url}</supportUrl>
+                            <supportSummary>Support provided through community involvement.
+                            </supportSummary>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
