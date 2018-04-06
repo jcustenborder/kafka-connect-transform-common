@@ -24,9 +24,11 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.transforms.Transformation;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public abstract class ToJsonTest extends TransformationTest {
@@ -36,12 +38,7 @@ public abstract class ToJsonTest extends TransformationTest {
 
   @Test
   public void test() {
-    this.transformation.configure(
-        ImmutableMap.of(
-            ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_UNDERSCORE.toString(),
-            ChangeCaseConfig.TO_CONFIG, CaseFormat.LOWER_UNDERSCORE.toString()
-        )
-    );
+    this.transformation.configure(ImmutableMap.of());
     final Schema inputSchema = SchemaBuilder.struct()
         .field("FIRST_NAME", Schema.STRING_SCHEMA)
         .field("LAST_NAME", Schema.STRING_SCHEMA)
@@ -72,6 +69,23 @@ public abstract class ToJsonTest extends TransformationTest {
       assertNotNull(transformedRecord, "transformedRecord should not be null.");
     }
 
+  }
+
+  @Test
+  public void ignoreNonStruct() {
+    final SinkRecord inputRecord = new SinkRecord(
+        "topic",
+        1,
+        null,
+        null,
+        null,
+        "",
+        1L
+    );
+
+    SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertEquals(inputRecord.key(), outputRecord.key());
+    assertEquals(inputRecord.value(), outputRecord.value());
   }
 
 
