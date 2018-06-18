@@ -1,10 +1,24 @@
 
 # Introduction
 
-
 This project contains common transformations for every day use cases with Kafka Connect.
 
+Table of Contents
+=================
 
+  * [BytesToString$Key](#bytestostringkey)
+  * [BytesToString$Value](#bytestostringvalue)
+  * [ChangeCase$Key](#changecasekey)
+  * [ChangeCase$Value](#changecasevalue)
+  * [ChangeTopicCase](#changetopiccase)
+  * [ExtractNestedField$Key](#extractnestedfieldkey)
+  * [ExtractNestedField$Value](#extractnestedfieldvalue)
+  * [ExtractTimestamp$Value](#extracttimestampvalue)
+  * [PatternRename$Key](#patternrenamekey)
+  * [PatternRename$Value](#patternrenamevalue)
+  * [ToJson$Key](#tojsonkey)
+  * [ToJson$Value](#tojsonvalue)
+  
 
 
 # Transformations
