@@ -48,48 +48,6 @@ The fields to transform.
 
 
 
-#### Examples
-
-##### Standalone Example
-
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
-
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Key
-```
-
-##### Distributed Example
-
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
-
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Key"
-}
-```
-
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
-
-Create a new instance.
-```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
-```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
-
 
 
 ## BytesToString(Value)
@@ -127,48 +85,6 @@ The fields to transform.
 
 
 
-#### Examples
-
-##### Standalone Example
-
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
-
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Value
-```
-
-##### Distributed Example
-
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
-
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Value"
-}
-```
-
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
-
-Create a new instance.
-```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
-```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
-
 
 
 ## ChangeCase(Key)
@@ -193,7 +109,7 @@ The format to move from
 
 *Type:* String
 
-*Validator:* ValidEnum{enum=CaseFormat, allowed=[LOWER_HYPHEN, LOWER_UNDERSCORE, LOWER_CAMEL, UPPER_CAMEL, UPPER_UNDERSCORE]}
+*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
 
 
 
@@ -205,55 +121,9 @@ The format to move from
 
 *Type:* String
 
-*Validator:* ValidEnum{enum=CaseFormat, allowed=[LOWER_HYPHEN, LOWER_UNDERSCORE, LOWER_CAMEL, UPPER_CAMEL, UPPER_UNDERSCORE]}
+*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
 
 
-
-#### Examples
-
-##### Standalone Example
-
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
-
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Key
-transforms.tran.from=< Required Configuration >
-transforms.tran.to=< Required Configuration >
-```
-
-##### Distributed Example
-
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
-
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Key",
-  "transforms.tran.from" : "< Required Configuration >",
-  "transforms.tran.to" : "< Required Configuration >"
-}
-```
-
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
-
-Create a new instance.
-```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
-```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
 
 
 
@@ -276,7 +146,7 @@ The format to move from
 
 *Type:* String
 
-*Validator:* ValidEnum{enum=CaseFormat, allowed=[LOWER_HYPHEN, LOWER_UNDERSCORE, LOWER_CAMEL, UPPER_CAMEL, UPPER_UNDERSCORE]}
+*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
 
 
 
@@ -288,55 +158,9 @@ The format to move from
 
 *Type:* String
 
-*Validator:* ValidEnum{enum=CaseFormat, allowed=[LOWER_HYPHEN, LOWER_UNDERSCORE, LOWER_CAMEL, UPPER_CAMEL, UPPER_UNDERSCORE]}
+*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
 
 
-
-#### Examples
-
-##### Standalone Example
-
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
-
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Value
-transforms.tran.from=< Required Configuration >
-transforms.tran.to=< Required Configuration >
-```
-
-##### Distributed Example
-
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
-
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Value",
-  "transforms.tran.from" : "< Required Configuration >",
-  "transforms.tran.to" : "< Required Configuration >"
-}
-```
-
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
-
-Create a new instance.
-```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
-```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
 
 
 
@@ -362,7 +186,7 @@ The format of the incoming topic name. `LOWER_CAMEL` = Java variable naming conv
 
 *Type:* String
 
-*Validator:* ValidEnum{enum=CaseFormat, allowed=[LOWER_HYPHEN, LOWER_UNDERSCORE, LOWER_CAMEL, UPPER_CAMEL, UPPER_UNDERSCORE]}
+*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
 
 
 
@@ -374,55 +198,9 @@ The format of the outgoing topic name. `LOWER_CAMEL` = Java variable naming conv
 
 *Type:* String
 
-*Validator:* ValidEnum{enum=CaseFormat, allowed=[LOWER_HYPHEN, LOWER_UNDERSCORE, LOWER_CAMEL, UPPER_CAMEL, UPPER_UNDERSCORE]}
+*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
 
 
-
-#### Examples
-
-##### Standalone Example
-
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
-
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.ChangeTopicCase
-transforms.tran.from=< Required Configuration >
-transforms.tran.to=< Required Configuration >
-```
-
-##### Distributed Example
-
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
-
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.ChangeTopicCase",
-  "transforms.tran.from" : "< Required Configuration >",
-  "transforms.tran.to" : "< Required Configuration >"
-}
-```
-
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
-
-Create a new instance.
-```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
-```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
 
 
 
@@ -470,54 +248,6 @@ The field to place the extracted value into.
 
 
 
-#### Examples
-
-##### Standalone Example
-
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
-
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.ExtractNestedField$Key
-transforms.tran.input.inner.field.name=< Required Configuration >
-transforms.tran.input.outer.field.name=< Required Configuration >
-transforms.tran.output.field.name=< Required Configuration >
-```
-
-##### Distributed Example
-
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
-
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.ExtractNestedField$Key",
-  "transforms.tran.input.inner.field.name" : "< Required Configuration >",
-  "transforms.tran.input.outer.field.name" : "< Required Configuration >",
-  "transforms.tran.output.field.name" : "< Required Configuration >"
-}
-```
-
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
-
-Create a new instance.
-```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
-```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
-
 
 
 ## ExtractNestedField(Value)
@@ -561,54 +291,6 @@ The field to place the extracted value into.
 
 
 
-#### Examples
-
-##### Standalone Example
-
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
-
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.ExtractNestedField$Value
-transforms.tran.input.inner.field.name=< Required Configuration >
-transforms.tran.input.outer.field.name=< Required Configuration >
-transforms.tran.output.field.name=< Required Configuration >
-```
-
-##### Distributed Example
-
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
-
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.ExtractNestedField$Value",
-  "transforms.tran.input.inner.field.name" : "< Required Configuration >",
-  "transforms.tran.input.outer.field.name" : "< Required Configuration >",
-  "transforms.tran.output.field.name" : "< Required Configuration >"
-}
-```
-
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
-
-Create a new instance.
-```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
-```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
-
 
 
 ## ExtractTimestamp(Value)
@@ -631,50 +313,6 @@ The field to pull the timestamp from. This must be an int64 or a timestamp.
 *Type:* String
 
 
-
-#### Examples
-
-##### Standalone Example
-
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
-
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.ExtractTimestamp$Value
-transforms.tran.field.name=< Required Configuration >
-```
-
-##### Distributed Example
-
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
-
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.ExtractTimestamp$Value",
-  "transforms.tran.field.name" : "< Required Configuration >"
-}
-```
-
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
-
-Create a new instance.
-```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
-```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
 
 
 
@@ -726,52 +364,6 @@ This transformation is used to manipulate fields in the Key of the record.
 
 
 
-#### Examples
-
-##### Standalone Example
-
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
-
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.PatternRename$Key
-transforms.tran.field.pattern=< Required Configuration >
-transforms.tran.field.replacement=< Required Configuration >
-```
-
-##### Distributed Example
-
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
-
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.PatternRename$Key",
-  "transforms.tran.field.pattern" : "< Required Configuration >",
-  "transforms.tran.field.replacement" : "< Required Configuration >"
-}
-```
-
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
-
-Create a new instance.
-```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
-```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
-
 
 
 ## PatternRename(Value)
@@ -819,52 +411,6 @@ This transformation is used to rename fields in the value of an input struct bas
 
 
 
-#### Examples
-
-##### Standalone Example
-
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
-
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.PatternRename$Value
-transforms.tran.field.pattern=< Required Configuration >
-transforms.tran.field.replacement=< Required Configuration >
-```
-
-##### Distributed Example
-
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
-
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.PatternRename$Value",
-  "transforms.tran.field.pattern" : "< Required Configuration >",
-  "transforms.tran.field.replacement" : "< Required Configuration >"
-}
-```
-
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
-
-Create a new instance.
-```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
-```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
-
 
 
 ## ToJson(Key)
@@ -907,48 +453,6 @@ Flag to determine if the JSON data should include the schema.
 
 
 
-#### Examples
-
-##### Standalone Example
-
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
-
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Key
-```
-
-##### Distributed Example
-
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
-
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Key"
-}
-```
-
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
-
-Create a new instance.
-```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
-```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
-
 
 
 ## ToJson(Value)
@@ -988,46 +492,90 @@ Flag to determine if the JSON data should include the schema.
 
 
 
-#### Examples
 
-##### Standalone Example
 
-This configuration is used typically along with [standalone mode](http://docs.confluent.io/current/connect/concepts.html#standalone-workers).
+## ToLong(Key)
 
-```properties
-name=Connector1
-connector.class=org.apache.kafka.some.SourceConnector
-tasks.max=1
-transforms=tran
-transforms.tran.type=com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Value
-```
+This transformation is used to convert a number to a long
 
-##### Distributed Example
+### Tip
 
-This configuration is used typically along with [distributed mode](http://docs.confluent.io/current/connect/concepts.html#distributed-workers).
-Write the following json to `connector.json`, configure all of the required values, and use the command below to
-post the configuration to one the distributed connect worker(s).
+This transformation is used to manipulate fields in the Key of the record.
 
-```json
-{
-  "name" : "Connector1",
-  "connector.class" : "org.apache.kafka.some.SourceConnector",
-  "transforms" : "tran",
-  "transforms.tran.type" : "com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Value"
-}
-```
 
-Use curl to post the configuration to one of the Kafka Connect Workers. Change `http://localhost:8083/` the the endpoint of
-one of your Kafka Connect worker(s).
+### Configuration
 
-Create a new instance.
+#### General
+
+
+##### `charset`
+
+The charset to use when creating the output string.
+
+*Importance:* High
+
+*Type:* String
+
+*Default Value:* UTF-8
+
+
+
+##### `fields`
+
+The fields to transform.
+
+*Importance:* High
+
+*Type:* List
+
+*Default Value:* []
+
+
+
+
+
+## ToLong(Value)
+
+This transformation is used to convert a number to a long
+
+
+
+### Configuration
+
+#### General
+
+
+##### `charset`
+
+The charset to use when creating the output string.
+
+*Importance:* High
+
+*Type:* String
+
+*Default Value:* UTF-8
+
+
+
+##### `fields`
+
+The fields to transform.
+
+*Importance:* High
+
+*Type:* List
+
+*Default Value:* []
+
+
+
+
+
+# Development
+
+## Building the source
+
 ```bash
-curl -s -X POST -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors
+mvn clean package
 ```
-
-Update an existing instance.
-```bash
-curl -s -X PUT -H 'Content-Type: application/json' --data @connector.json http://localhost:8083/connectors/TestSinkConnector1/config
-```
-
 
