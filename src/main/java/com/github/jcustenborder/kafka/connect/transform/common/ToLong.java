@@ -38,7 +38,7 @@ public abstract class ToLong<R extends ConnectRecord<R>> extends BaseTransformat
 
   @Override
   public ConfigDef config() {
-    return BytesToStringConfig.config();
+    return ToLongConfig.config();
   }
 
   ToLongConfig config;
