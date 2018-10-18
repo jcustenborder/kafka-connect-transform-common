@@ -23,7 +23,7 @@
     <parent>
         <groupId>com.github.jcustenborder.kafka.connect</groupId>
         <artifactId>kafka-connect-parent</artifactId>
-        <version>1.1.0-cp3</version>
+        <version>2.0.0</version>
     </parent>
     <artifactId>kafka-connect-transform-common</artifactId>
     <version>0.1.0-SNAPSHOT</version>
@@ -82,34 +82,20 @@
             <plugin>
                 <groupId>io.confluent</groupId>
                 <artifactId>kafka-connect-maven-plugin</artifactId>
-                <version>0.9.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>kafka-connect</goal>
-                        </goals>
-                        <configuration>
-                            <ownerUsername>jcustenborder</ownerUsername>
-                            <confluentControlCenterIntegration>true</confluentControlCenterIntegration>
-                            <documentationUrl>
-                                https://jcustenborder.github.io/kafka-connect-documentation/
-                            </documentationUrl>
-                            <ownerName>Jeremy Custenborder</ownerName>
-                            <dockerNamespace>jcustenborder</dockerNamespace>
-                            <dockerName>kafka-connect-docker</dockerName>
-                            <pluginTypes>
-                                <pluginType>transform</pluginType>
-                            </pluginTypes>
-                            <tags>
-                                <tag>Transformation</tag>
-                            </tags>
-                            <title>Common Transformations</title>
-                            <supportUrl>${pom.issueManagement.url}</supportUrl>
-                            <supportSummary>Support provided through community involvement.
-                            </supportSummary>
-                        </configuration>
-                    </execution>
-                </executions>
+                <configuration>
+                    <confluentControlCenterIntegration>true</confluentControlCenterIntegration>
+                    <documentationUrl>https://jcustenborder.github.io/kafka-connect-documentation/</documentationUrl>
+                    <componentTypes>
+                        <componentType>source</componentType>
+                    </componentTypes>
+                    <tags>
+                        <tag>Twitter</tag>
+                        <tag>Social</tag>
+                    </tags>
+                    <title>Kafka Connect Common Transformations</title>
+                    <supportUrl>${pom.issueManagement.url}</supportUrl>
+                    <supportSummary>Support provided through community involvement.</supportSummary>
+                </configuration>
             </plugin>
         </plugins>
     </build>
