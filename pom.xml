@@ -86,11 +86,11 @@
                     <confluentControlCenterIntegration>true</confluentControlCenterIntegration>
                     <documentationUrl>https://jcustenborder.github.io/kafka-connect-documentation/</documentationUrl>
                     <componentTypes>
-                        <componentType>source</componentType>
+                        <componentType>transform</componentType>
                     </componentTypes>
                     <tags>
-                        <tag>Twitter</tag>
-                        <tag>Social</tag>
+                        <tag>Common</tag>
+                        <tag>Transformation</tag>
                     </tags>
                     <title>Kafka Connect Common Transformations</title>
                     <supportUrl>${pom.issueManagement.url}</supportUrl>
