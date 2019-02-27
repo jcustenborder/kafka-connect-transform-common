@@ -47,18 +47,24 @@ public abstract class TopicNameToField<R extends ConnectRecord<R>> extends BaseT
   protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
     final Schema schema = this.schemaLookup.computeIfAbsent(inputSchema, s -> {
       SchemaBuilder builder = SchemaBuilder.struct()
-          .name(s.name())
-          .doc(s.doc())
-          .parameters(s.parameters())
-          .version(s.version())
-          .defaultValue(s.defaultValue());
+          .name(inputSchema.name())
+          .doc(inputSchema.doc())
+          .version(inputSchema.version());
+      if (null != inputSchema.defaultValue()) {
+        builder.defaultValue(inputSchema.defaultValue());
+      }
+      ;
+      if (null != inputSchema.parameters() && !inputSchema.parameters().isEmpty()) {
+        builder.parameters(inputSchema.parameters());
+      }
+
       if (inputSchema.isOptional()) {
         builder.optional();
       }
       for (Field field : inputSchema.fields()) {
         builder.field(field.name(), field.schema());
       }
-      builder.field(config.field, s);
+      builder.field(config.field, this.schema);
       return builder.build();
     });
     Struct struct = new Struct(schema);

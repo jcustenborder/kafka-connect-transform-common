@@ -39,7 +39,6 @@ public class TopicNameToFieldConfig extends AbstractConfig {
         .define(
             ConfigKeyBuilder.of(FIELD_CONFIG, ConfigDef.Type.STRING)
                 .documentation(FIELD_DOC)
-                .defaultValue(Collections.emptyList())
                 .importance(ConfigDef.Importance.HIGH)
                 .build()
         );
