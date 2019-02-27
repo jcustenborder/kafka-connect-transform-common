@@ -19,7 +19,6 @@ import com.github.jcustenborder.kafka.connect.utils.config.ConfigKeyBuilder;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 
-import java.util.Collections;
 import java.util.Map;
 
 public class TopicNameToFieldConfig extends AbstractConfig {
