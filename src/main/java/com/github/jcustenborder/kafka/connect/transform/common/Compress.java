@@ -28,7 +28,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Base64;
 import java.util.Map;
 
 public abstract class Compress<R extends ConnectRecord<R>> extends BaseKeyValueTransformation<R> {
@@ -53,15 +52,6 @@ public abstract class Compress<R extends ConnectRecord<R>> extends BaseKeyValueT
   @Override
   public void configure(Map<String, ?> map) {
 
-  }
-
-  @Override
-  protected SchemaAndValue processString(R record, Schema inputSchema, String base64Input) {
-    byte[] input = Base64.getDecoder().decode(base64Input);
-    Schema bytesSchema = inputSchema.isOptional() ? Schema.OPTIONAL_BYTES_SCHEMA : Schema.BYTES_SCHEMA;
-    SchemaAndValue compressed = processBytes(record, bytesSchema, input);
-    String result = Base64.getEncoder().encodeToString((byte[]) compressed.value());
-    return new SchemaAndValue(inputSchema, result);
   }
 
   @Override
