@@ -127,6 +127,25 @@ public abstract class ExtractTimestamp<R extends ConnectRecord<R>> implements Tr
   }
 
 
+  @Title("ExtractTimestamp(Key)")
+  @Description("This transformation is used to use a field from the input data to override the timestamp for the record.")
+  public static class Key<R extends ConnectRecord<R>> extends ExtractTimestamp<R> {
+
+    @Override
+    public R apply(R r) {
+      final long timestamp = process(new SchemaAndValue(r.keySchema(), r.key()));
+      return r.newRecord(
+          r.topic(),
+          r.kafkaPartition(),
+          r.keySchema(),
+          r.key(),
+          r.valueSchema(),
+          r.value(),
+          timestamp
+      );
+    }
+  }
+
   @Title("ExtractTimestamp(Value)")
   @Description("This transformation is used to use a field from the input data to override the timestamp for the record.")
   public static class Value<R extends ConnectRecord<R>> extends ExtractTimestamp<R> {

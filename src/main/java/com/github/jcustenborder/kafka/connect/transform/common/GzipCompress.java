@@ -15,9 +15,32 @@
  */
 package com.github.jcustenborder.kafka.connect.transform.common;
 
-import com.github.jcustenborder.kafka.connect.utils.BaseDocumentationTest;
+import org.apache.kafka.connect.connector.ConnectRecord;
 
-public class DocumentationTest extends BaseDocumentationTest {
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.zip.GZIPOutputStream;
 
+public abstract class GzipCompress<R extends ConnectRecord<R>> extends Compress<R> {
+  public GzipCompress(boolean isKey) {
+    super(isKey);
+  }
+
+  @Override
+  protected OutputStream createStream(OutputStream input) throws IOException {
+    return new GZIPOutputStream(input);
+  }
+
+  public static class Key<R extends ConnectRecord<R>> extends GzipCompress<R> {
+    public Key() {
+      super(true);
+    }
+  }
+
+  public static class Value<R extends ConnectRecord<R>> extends GzipCompress<R> {
+    public Value() {
+      super(false);
+    }
+  }
 
 }
