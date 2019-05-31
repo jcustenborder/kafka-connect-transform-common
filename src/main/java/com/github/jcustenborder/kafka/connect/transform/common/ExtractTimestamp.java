@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.Map;
 
+@Title("ExtractTimestamp")
+@Description("This transformation is used to use a field from the input data to override the timestamp for the record.")
 public abstract class ExtractTimestamp<R extends ConnectRecord<R>> implements Transformation<R> {
   private static final Logger log = LoggerFactory.getLogger(ExtractTimestamp.class);
   public ExtractTimestampConfig config;
@@ -127,13 +129,11 @@ public abstract class ExtractTimestamp<R extends ConnectRecord<R>> implements Tr
   }
 
 
-  @Title("ExtractTimestamp(Key)")
-  @Description("This transformation is used to use a field from the input data to override the timestamp for the record.")
   public static class Key<R extends ConnectRecord<R>> extends ExtractTimestamp<R> {
 
     @Override
     public R apply(R r) {
-      final long timestamp = process(new SchemaAndValue(r.keySchema(), r.key()));
+      final long timestamp = process(new SchemaAndValue(r.valueSchema(), r.value()));
       return r.newRecord(
           r.topic(),
           r.kafkaPartition(),
@@ -146,8 +146,6 @@ public abstract class ExtractTimestamp<R extends ConnectRecord<R>> implements Tr
     }
   }
 
-  @Title("ExtractTimestamp(Value)")
-  @Description("This transformation is used to use a field from the input data to override the timestamp for the record.")
   public static class Value<R extends ConnectRecord<R>> extends ExtractTimestamp<R> {
 
     @Override
