@@ -16,7 +16,11 @@
 @Introduction("\n" +
     "This project contains common transformations for every day use cases with Kafka Connect.")
     @Title("Common Transformations")
+@PluginName("kafka-connect-transform-common")
+@PluginOwner("jcustenborder")
 package com.github.jcustenborder.kafka.connect.transform.common;
 
 import com.github.jcustenborder.kafka.connect.utils.config.Introduction;
 import com.github.jcustenborder.kafka.connect.utils.config.Title;
+import com.github.jcustenborder.kafka.connect.utils.config.PluginName;
+import com.github.jcustenborder.kafka.connect.utils.config.PluginOwner;
