@@ -1,0 +1,18 @@
+{
+  "input" : {
+    "topic" : "topic",
+    "kafkaPartition" : 1,
+    "value" : {
+      "timestamp" : 1512164613123
+    },
+    "timestampType" : "NO_TIMESTAMP_TYPE",
+    "offset" : 1,
+    "headers" : [ ]
+  },
+  "description" : "This example takes the value of the `timestamp` field and uses it for the record timestamp.",
+  "name" : "Example",
+  "config" : {
+    "field.name" : "timestamp"
+  },
+  "childClass" : "Value"
+}

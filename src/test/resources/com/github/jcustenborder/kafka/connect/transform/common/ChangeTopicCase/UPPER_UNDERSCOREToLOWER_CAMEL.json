@@ -1,0 +1,15 @@
+{
+  "input" : {
+    "topic" : "TOPIC_NAME",
+    "kafkaPartition" : 1,
+    "timestampType" : "NO_TIMESTAMP_TYPE",
+    "offset" : 12345,
+    "headers" : [ ]
+  },
+  "description" : "This example will convert the field names of a schema from upper underscore to lower underscore.",
+  "name" : "UPPER_UNDERSCORE to LOWER_CAMEL",
+  "config" : {
+    "from" : "UPPER_UNDERSCORE",
+    "to" : "LOWER_CAMEL"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "title" : "Simple",
+  "input" : {
+    "topic" : "test",
+    "kafkaPartition" : 0,
+    "valueSchema" : {
+      "name" : "com.foo.bar.whatever.ASDF",
+      "type" : "STRUCT",
+      "isOptional" : false,
+      "fieldSchemas" : {
+        "firstName" : {
+          "type" : "STRING",
+          "isOptional" : true
+        }
+      }
+    },
+    "value" : {
+      "schema" : {
+        "name" : "com.foo.bar.whatever.ASDF",
+        "type" : "STRUCT",
+        "isOptional" : false,
+        "fieldSchemas" : {
+          "firstName" : {
+            "type" : "STRING",
+            "isOptional" : true
+          }
+        }
+      },
+      "fieldValues" : [ {
+        "name" : "firstName",
+        "schema" : {
+          "type" : "STRING",
+          "isOptional" : true
+        },
+        "storage" : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      } ]
+    },
+    "timestampType" : "NO_TIMESTAMP_TYPE",
+    "offset" : 1234,
+    "headers" : [ ]
+  },
+  "description" : "This example copies the schema name from the value of the record and replaces the topic with the name of the schema.",
+  "name" : "Simple",
+  "config" : { },
+  "childClass" : "Value"
+}

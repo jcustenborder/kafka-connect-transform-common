@@ -1,0 +1,18 @@
+{
+  "input" : {
+    "topic" : "topic",
+    "kafkaPartition" : 1,
+    "valueSchema" : {
+      "type" : "BYTES",
+      "isOptional" : false
+    },
+    "value" : "dGhpcyBpcyBhIHRlc3Q=",
+    "timestampType" : "NO_TIMESTAMP_TYPE",
+    "offset" : 1,
+    "headers" : [ ]
+  },
+  "description" : "This example converts the `bytes` field from a byte array to a string.",
+  "name" : "Struct",
+  "config" : { },
+  "childClass" : "Value"
+}

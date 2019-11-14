@@ -1,0 +1,141 @@
+{
+  "input" : {
+    "topic" : "topic",
+    "kafkaPartition" : 1,
+    "valueSchema" : {
+      "type" : "STRUCT",
+      "isOptional" : false,
+      "fieldSchemas" : {
+        "first_name" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "last_name" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "address" : {
+          "name" : "Address",
+          "type" : "STRUCT",
+          "isOptional" : false,
+          "fieldSchemas" : {
+            "city" : {
+              "type" : "STRING",
+              "isOptional" : false
+            },
+            "state" : {
+              "type" : "STRING",
+              "isOptional" : false
+            }
+          }
+        }
+      }
+    },
+    "value" : {
+      "schema" : {
+        "type" : "STRUCT",
+        "isOptional" : false,
+        "fieldSchemas" : {
+          "first_name" : {
+            "type" : "STRING",
+            "isOptional" : false
+          },
+          "last_name" : {
+            "type" : "STRING",
+            "isOptional" : false
+          },
+          "address" : {
+            "name" : "Address",
+            "type" : "STRUCT",
+            "isOptional" : false,
+            "fieldSchemas" : {
+              "city" : {
+                "type" : "STRING",
+                "isOptional" : false
+              },
+              "state" : {
+                "type" : "STRING",
+                "isOptional" : false
+              }
+            }
+          }
+        }
+      },
+      "fieldValues" : [ {
+        "name" : "first_name",
+        "schema" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "storage" : "test"
+      }, {
+        "name" : "last_name",
+        "schema" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "storage" : "developer"
+      }, {
+        "name" : "address",
+        "schema" : {
+          "name" : "Address",
+          "type" : "STRUCT",
+          "isOptional" : false,
+          "fieldSchemas" : {
+            "city" : {
+              "type" : "STRING",
+              "isOptional" : false
+            },
+            "state" : {
+              "type" : "STRING",
+              "isOptional" : false
+            }
+          }
+        },
+        "struct" : {
+          "schema" : {
+            "name" : "Address",
+            "type" : "STRUCT",
+            "isOptional" : false,
+            "fieldSchemas" : {
+              "city" : {
+                "type" : "STRING",
+                "isOptional" : false
+              },
+              "state" : {
+                "type" : "STRING",
+                "isOptional" : false
+              }
+            }
+          },
+          "fieldValues" : [ {
+            "name" : "city",
+            "schema" : {
+              "type" : "STRING",
+              "isOptional" : false
+            },
+            "storage" : "Austin"
+          }, {
+            "name" : "state",
+            "schema" : {
+              "type" : "STRING",
+              "isOptional" : false
+            },
+            "storage" : "tx"
+          } ]
+        }
+      } ]
+    },
+    "timestampType" : "NO_TIMESTAMP_TYPE",
+    "offset" : 1,
+    "headers" : [ ]
+  },
+  "description" : "This example takes the value of `address.state` and copies it to a field on the `state` field.",
+  "name" : "Example",
+  "config" : {
+    "input.inner.field.name" : "state",
+    "input.outer.field.name" : "address",
+    "output.field.name" : "state"
+  },
+  "childClass" : "Value"
+}

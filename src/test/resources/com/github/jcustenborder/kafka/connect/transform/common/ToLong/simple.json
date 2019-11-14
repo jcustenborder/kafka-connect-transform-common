@@ -1,0 +1,110 @@
+{
+  "input" : {
+    "topic" : "test",
+    "kafkaPartition" : 1,
+    "keySchema" : {
+      "name" : "key",
+      "type" : "STRUCT",
+      "isOptional" : false,
+      "fieldSchemas" : {
+        "id" : {
+          "type" : "INT64",
+          "isOptional" : false
+        }
+      }
+    },
+    "key" : {
+      "schema" : {
+        "name" : "key",
+        "type" : "STRUCT",
+        "isOptional" : false,
+        "fieldSchemas" : {
+          "id" : {
+            "type" : "INT64",
+            "isOptional" : false
+          }
+        }
+      },
+      "fieldValues" : [ {
+        "name" : "id",
+        "schema" : {
+          "type" : "INT64",
+          "isOptional" : false
+        },
+        "storage" : 1234
+      } ]
+    },
+    "valueSchema" : {
+      "name" : "value",
+      "type" : "STRUCT",
+      "isOptional" : false,
+      "fieldSchemas" : {
+        "name" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "value" : {
+          "name" : "org.apache.kafka.connect.data.Decimal",
+          "type" : "BYTES",
+          "version" : 1,
+          "parameters" : {
+            "scale" : "2"
+          },
+          "isOptional" : false
+        }
+      }
+    },
+    "value" : {
+      "schema" : {
+        "name" : "value",
+        "type" : "STRUCT",
+        "isOptional" : false,
+        "fieldSchemas" : {
+          "name" : {
+            "type" : "STRING",
+            "isOptional" : false
+          },
+          "value" : {
+            "name" : "org.apache.kafka.connect.data.Decimal",
+            "type" : "BYTES",
+            "version" : 1,
+            "parameters" : {
+              "scale" : "2"
+            },
+            "isOptional" : false
+          }
+        }
+      },
+      "fieldValues" : [ {
+        "name" : "name",
+        "schema" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "storage" : "testing"
+      }, {
+        "name" : "value",
+        "schema" : {
+          "name" : "org.apache.kafka.connect.data.Decimal",
+          "type" : "BYTES",
+          "version" : 1,
+          "parameters" : {
+            "scale" : "2"
+          },
+          "isOptional" : false
+        },
+        "storage" : 12342.31
+      } ]
+    },
+    "timestamp" : 1530286549123,
+    "timestampType" : "CREATE_TIME",
+    "offset" : 91283741,
+    "headers" : [ ]
+  },
+  "description" : "This example takes the `value` field and converts it to a long.",
+  "name" : "Example",
+  "config" : {
+    "fields" : "value"
+  },
+  "childClass" : "Value"
+}

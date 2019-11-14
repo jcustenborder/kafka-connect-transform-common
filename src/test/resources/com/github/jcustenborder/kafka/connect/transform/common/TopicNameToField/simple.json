@@ -1,0 +1,51 @@
+{
+  "input" : {
+    "topic" : "testing",
+    "kafkaPartition" : 1,
+    "keySchema" : {
+      "type" : "STRING",
+      "isOptional" : false
+    },
+    "key" : "foo",
+    "valueSchema" : {
+      "type" : "STRUCT",
+      "isOptional" : false,
+      "fieldSchemas" : {
+        "test" : {
+          "type" : "STRING",
+          "isOptional" : false
+        }
+      }
+    },
+    "value" : {
+      "schema" : {
+        "type" : "STRUCT",
+        "isOptional" : false,
+        "fieldSchemas" : {
+          "test" : {
+            "type" : "STRING",
+            "isOptional" : false
+          }
+        }
+      },
+      "fieldValues" : [ {
+        "name" : "test",
+        "schema" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "storage" : "test"
+      } ]
+    },
+    "timestamp" : 1530286549123,
+    "timestampType" : "CREATE_TIME",
+    "offset" : 91283741,
+    "headers" : [ ]
+  },
+  "description" : "This example takes the topic and adds it to the `topicName` field of the value.",
+  "name" : "Example",
+  "config" : {
+    "field" : "topicName"
+  },
+  "childClass" : "Value"
+}
