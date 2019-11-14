@@ -1,0 +1,63 @@
+{
+  "input" : {
+    "topic" : "test",
+    "kafkaPartition" : 1,
+    "valueSchema" : {
+      "name" : "testing",
+      "type" : "STRUCT",
+      "isOptional" : false,
+      "fieldSchemas" : {
+        "prefixedfirstname" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "prefixedlastname" : {
+          "type" : "STRING",
+          "isOptional" : false
+        }
+      }
+    },
+    "value" : {
+      "schema" : {
+        "name" : "testing",
+        "type" : "STRUCT",
+        "isOptional" : false,
+        "fieldSchemas" : {
+          "prefixedfirstname" : {
+            "type" : "STRING",
+            "isOptional" : false
+          },
+          "prefixedlastname" : {
+            "type" : "STRING",
+            "isOptional" : false
+          }
+        }
+      },
+      "fieldValues" : [ {
+        "name" : "prefixedfirstname",
+        "schema" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "storage" : "example"
+      }, {
+        "name" : "prefixedlastname",
+        "schema" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "storage" : "user"
+      } ]
+    },
+    "timestampType" : "NO_TIMESTAMP_TYPE",
+    "offset" : 1234,
+    "headers" : [ ]
+  },
+  "description" : "This example takes fields that are prefixed with `prefixed` and removes the prefix.",
+  "name" : "Example",
+  "config" : {
+    "field.pattern" : "^prefixed",
+    "field.replacement" : ""
+  },
+  "childClass" : "Value"
+}

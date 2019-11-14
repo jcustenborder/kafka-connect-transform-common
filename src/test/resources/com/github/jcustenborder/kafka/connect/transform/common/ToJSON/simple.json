@@ -1,0 +1,58 @@
+{
+  "input" : {
+    "topic" : "topic",
+    "kafkaPartition" : 1,
+    "valueSchema" : {
+      "type" : "STRUCT",
+      "isOptional" : false,
+      "fieldSchemas" : {
+        "FIRST_NAME" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "LAST_NAME" : {
+          "type" : "STRING",
+          "isOptional" : false
+        }
+      }
+    },
+    "value" : {
+      "schema" : {
+        "type" : "STRUCT",
+        "isOptional" : false,
+        "fieldSchemas" : {
+          "FIRST_NAME" : {
+            "type" : "STRING",
+            "isOptional" : false
+          },
+          "LAST_NAME" : {
+            "type" : "STRING",
+            "isOptional" : false
+          }
+        }
+      },
+      "fieldValues" : [ {
+        "name" : "FIRST_NAME",
+        "schema" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "storage" : "test"
+      }, {
+        "name" : "LAST_NAME",
+        "schema" : {
+          "type" : "STRING",
+          "isOptional" : false
+        },
+        "storage" : "user"
+      } ]
+    },
+    "timestampType" : "NO_TIMESTAMP_TYPE",
+    "offset" : 1,
+    "headers" : [ ]
+  },
+  "description" : "This example takes an input struct and converts it to JSON.",
+  "name" : "Example",
+  "config" : { },
+  "childClass" : "Value"
+}
