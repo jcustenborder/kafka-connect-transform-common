@@ -15,7 +15,6 @@
  */
 package com.github.jcustenborder.kafka.connect.transform.common;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Schema;
@@ -24,10 +23,10 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.transforms.Transformation;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 
-import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
-import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -37,7 +36,7 @@ public abstract class ToJsonTest extends TransformationTest {
   }
 
   @Test
-  public void test() {
+  public void struct() {
     this.transformation.configure(ImmutableMap.of());
     final Schema inputSchema = SchemaBuilder.struct()
         .field("FIRST_NAME", Schema.STRING_SCHEMA)
@@ -64,12 +63,31 @@ public abstract class ToJsonTest extends TransformationTest {
         1L
     );
 
-    for (int i = 0; i < 50; i++) {
-      final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
-      assertNotNull(transformedRecord, "transformedRecord should not be null.");
-    }
-
+    final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
+    assertNotNull(transformedRecord, "transformedRecord should not be null.");
   }
+
+  @Test
+  public void map() {
+    this.transformation.configure(ImmutableMap.of());
+    Map<String, String> input = new LinkedHashMap<>();
+    input.put("FIRST_NAME", "test");
+    input.put("LAST_NAME", "user");
+
+    final SinkRecord inputRecord = new SinkRecord(
+        "topic",
+        1,
+        null,
+        null,
+        null,
+        input,
+        1L
+    );
+
+    final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
+    assertNotNull(transformedRecord, "transformedRecord should not be null.");
+  }
+
 
   @Test
   public void ignoreNonStruct() {
