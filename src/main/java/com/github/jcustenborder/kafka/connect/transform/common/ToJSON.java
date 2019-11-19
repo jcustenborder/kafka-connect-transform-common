@@ -67,8 +67,7 @@ public abstract class ToJSON<R extends ConnectRecord<R>> extends BaseTransformat
     return new SchemaAndValue(inputSchema, input);
   }
 
-  @Override
-  protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
+  SchemaAndValue schemaAndValue(Schema inputSchema, Object input) {
     final byte[] buffer = this.converter.fromConnectData("dummy", inputSchema, input);
     final Schema schema;
     final Object value;
@@ -93,6 +92,16 @@ public abstract class ToJSON<R extends ConnectRecord<R>> extends BaseTransformat
     }
 
     return new SchemaAndValue(schema, value);
+  }
+
+  @Override
+  protected SchemaAndValue processMap(R record, Map<String, Object> input) {
+    return schemaAndValue(null, input);
+  }
+
+  @Override
+  protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
+    return schemaAndValue(inputSchema, input);
   }
 
   @Title("ToJson(Key)")
