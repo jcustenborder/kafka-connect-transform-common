@@ -11,6 +11,9 @@ import org.apache.kafka.connect.transforms.Transformation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+
+import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class HeaderToFieldTest {
@@ -23,9 +26,9 @@ public class HeaderToFieldTest {
 
 
   @Test
-  public void apply() {
+  public void apply() throws IOException {
     this.transformation.configure(
-        ImmutableMap.of()
+        ImmutableMap.of(HeaderToFieldConfig.HEADER_MAPPINGS_CONF, "applicationId:STRING")
     );
 
     ConnectHeaders inputHeaders = new ConnectHeaders();
@@ -39,6 +42,16 @@ public class HeaderToFieldTest {
     Struct inputStruct = new Struct(inputSchema)
         .put("firstName", "example")
         .put("lastName", "user");
+
+    Schema expectedSchema = SchemaBuilder.struct()
+        .field("firstName", Schema.OPTIONAL_STRING_SCHEMA)
+        .field("lastName", Schema.OPTIONAL_STRING_SCHEMA)
+        .field("applicationId", Schema.OPTIONAL_STRING_SCHEMA)
+        .build();
+    Struct expectedStruct = new Struct(expectedSchema)
+        .put("firstName", "example")
+        .put("lastName", "user")
+        .put("applicationId", "testing");
 
     SinkRecord inputRecord = new SinkRecord(
         "testing",
@@ -55,9 +68,7 @@ public class HeaderToFieldTest {
 
     SinkRecord actualRecord = this.transformation.apply(inputRecord);
     assertNotNull(actualRecord, "record should not be null.");
-
-
-
+    assertStruct(expectedStruct, (Struct) actualRecord.value());
   }
 
 }

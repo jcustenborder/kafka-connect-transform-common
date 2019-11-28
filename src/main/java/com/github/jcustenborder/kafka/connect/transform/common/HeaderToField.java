@@ -24,7 +24,6 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
-import org.apache.kafka.connect.header.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,29 +46,6 @@ public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTrans
     return HeaderToFieldConfig.config();
   }
 
-  static abstract class ConversionHandler {
-    final String header;
-    final String field;
-
-    protected ConversionHandler(String header, String field) {
-      this.header = header;
-      this.field = field;
-    }
-
-    abstract Object convert(Header header);
-
-    public void convert(ConnectRecord record, Struct struct) {
-      final Header header = record.headers().lastWithName(this.header);
-      Object fieldValue;
-      if (null != header) {
-        fieldValue = convert(header);
-      } else {
-        fieldValue = null;
-      }
-
-      struct.put(this.field, fieldValue);
-    }
-  }
 
   static class Conversion {
     public final Schema newSchema;
@@ -107,10 +83,12 @@ public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTrans
       log.info("conversion() - Building new schema for {}", schema);
 
       SchemaBuilder builder = SchemaBuilders.of(schema);
-      List<ConversionHandler> handlers = new ArrayList<>();
+      List<ConversionHandler> handlers = new ArrayList<>(this.config.mappings.size());
       for (HeaderToFieldConfig.HeaderToFieldMapping mapping : this.config.mappings) {
         log.trace("conversion() - adding field '{}' with schema {}", mapping.field, mapping.schema);
         builder.field(mapping.field, mapping.schema);
+        ConversionHandler handler = ConversionHandler.of(mapping.schema, mapping.header, mapping.field);
+        handlers.add(handler);
       }
       Schema newSchema = builder.build();
       return Conversion.of(newSchema, handlers);

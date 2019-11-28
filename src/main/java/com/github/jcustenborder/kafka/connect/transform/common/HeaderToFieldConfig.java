@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
@@ -145,6 +146,11 @@ class HeaderToFieldConfig extends AbstractConfig {
         builder.append(")");
       }
       return builder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(this.header, this.field, this.schema);
     }
 
     @Override
