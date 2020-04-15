@@ -1,0 +1,64 @@
+{
+  "input": {
+    "topic": "testing",
+    "kafkaPartition": 1,
+    "valueSchema": {
+      "type": "STRUCT",
+      "isOptional": false,
+      "fieldSchemas": {
+        "firstName": {
+          "type": "STRING",
+          "isOptional": true
+        },
+        "lastName": {
+          "type": "STRING",
+          "isOptional": true
+        }
+      }
+    },
+    "value": {
+      "schema": {
+        "type": "STRUCT",
+        "isOptional": false,
+        "fieldSchemas": {
+          "firstName": {
+            "type": "STRING",
+            "isOptional": true
+          },
+          "lastName": {
+            "type": "STRING",
+            "isOptional": true
+          }
+        }
+      },
+      "fieldValues": [
+        {
+          "name": "firstName",
+          "schema": {
+            "type": "STRING",
+            "isOptional": true
+          },
+          "storage": "example"
+        },
+        {
+          "name": "lastName",
+          "schema": {
+            "type": "STRING",
+            "isOptional": true
+          },
+          "storage": "user"
+        }
+      ]
+    },
+    "timestamp": 123412351,
+    "timestampType": "NO_TIMESTAMP_TYPE",
+    "offset": 12345,
+    "headers": []
+  },
+  "description": "The following example will insert a field `timestamp` into the value of the record.",
+  "name": "Insert timestamp field",
+  "config": {
+    "fields": "timestamp"
+  },
+  "childClass": "Value"
+}
