@@ -1,59 +1,45 @@
-
 # Introduction
+[Documentation](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common) | [Confluent Hub](https://www.confluent.io/hub/jcustenborder/kafka-connect-transform-common)
 
 
 This project contains common transformations for every day use cases with Kafka Connect.
+
+# Installation
+
+## Confluent Hub
+
+The following command can be used to install the plugin directly from the Confluent Hub using the
+[Confluent Hub Client](https://docs.confluent.io/current/connect/managing/confluent-hub/client.html).
+
+```bash
+confluent-hub install jcustenborder/kafka-connect-transform-common:latest
+```
+
+## Manually
+
+The zip file that is deployed to the [Confluent Hub](https://www.confluent.io/hub/jcustenborder/kafka-connect-transform-common) is available under
+`target/components/packages/`. You can manually extract this zip file which includes all dependencies. All the dependencies
+that are required to deploy the plugin are under `target/kafka-connect-target` as well. Make sure that you include all the dependencies that are required
+to run the plugin.
+
+1. Create a directory under the `plugin.path` on your Connect worker.
+2. Copy all of the dependencies under the newly created subdirectory.
+3. Restart the Connect worker.
 
 
 
 
 # Transformations
+## [BytesToString](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/BytesToString.html)
 
-
-## BytesToString(Key)
-
-This transformation is used to convert a byte array to a string.
-
-### Tip
-
-This transformation is used to manipulate fields in the Key of the record.
-
-
-### Configuration
-
-#### General
-
-
-##### `charset`
-
-The charset to use when creating the output string.
-
-*Importance:* High
-
-*Type:* String
-
-*Default Value:* UTF-8
-
-
-
-##### `fields`
-
-The fields to transform.
-
-*Importance:* High
-
-*Type:* List
-
-*Default Value:* []
-
-
-
-
-
-## BytesToString(Value)
-
-This transformation is used to convert a byte array to a string.
-
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.BytesToString$Value
+```
 
 
 ### Configuration
@@ -65,9 +51,9 @@ This transformation is used to convert a byte array to a string.
 
 The charset to use when creating the output string.
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* String
+*Type:* STRING
 
 *Default Value:* UTF-8
 
@@ -77,60 +63,23 @@ The charset to use when creating the output string.
 
 The fields to transform.
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* List
-
-*Default Value:* []
+*Type:* LIST
 
 
 
 
+## [ChangeCase](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/ChangeCase.html)
 
-## ChangeCase(Key)
-
-This transformation is used to change the case of fields in an input struct.
-
-### Tip
-
-This transformation is used to manipulate fields in the Key of the record.
-
-
-### Configuration
-
-#### General
-
-
-##### `from`
-
-The format to move from 
-
-*Importance:* High
-
-*Type:* String
-
-*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
-
-
-
-##### `to`
-
-
-
-*Importance:* High
-
-*Type:* String
-
-*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
-
-
-
-
-
-## ChangeCase(Value)
-
-This transformation is used to change the case of fields in an input struct.
-
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.ChangeCase$Value
+```
 
 
 ### Configuration
@@ -142,11 +91,11 @@ This transformation is used to change the case of fields in an input struct.
 
 The format to move from 
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* String
+*Type:* STRING
 
-*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
+*Validator:* Matches: ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
 
 
 
@@ -154,25 +103,25 @@ The format to move from
 
 
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* String
+*Type:* STRING
 
-*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
-
-
+*Validator:* Matches: ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
 
 
 
-## ChangeTopicCase
+
+## [ChangeTopicCase](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/ChangeTopicCase.html)
+
+```
+com.github.jcustenborder.kafka.connect.transform.common.ChangeTopicCase
+```
 
 This transformation is used to change the case of a topic.
-
 ### Tip
 
 This transformation will convert a topic name like 'TOPIC_NAME' to `topicName`, or `topic_name`.
-
-
 ### Configuration
 
 #### General
@@ -182,11 +131,11 @@ This transformation will convert a topic name like 'TOPIC_NAME' to `topicName`, 
 
 The format of the incoming topic name. `LOWER_CAMEL` = Java variable naming convention, e.g., "lowerCamel". `LOWER_HYPHEN` = Hyphenated variable naming convention, e.g., "lower-hyphen". `LOWER_UNDERSCORE` = C++ variable naming convention, e.g., "lower_underscore". `UPPER_CAMEL` = Java and C++ class naming convention, e.g., "UpperCamel". `UPPER_UNDERSCORE` = Java and C++ constant naming convention, e.g., "UPPER_UNDERSCORE".
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* String
+*Type:* STRING
 
-*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
+*Validator:* Matches: ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
 
 
 
@@ -194,66 +143,25 @@ The format of the incoming topic name. `LOWER_CAMEL` = Java variable naming conv
 
 The format of the outgoing topic name. `LOWER_CAMEL` = Java variable naming convention, e.g., "lowerCamel". `LOWER_HYPHEN` = Hyphenated variable naming convention, e.g., "lower-hyphen". `LOWER_UNDERSCORE` = C++ variable naming convention, e.g., "lower_underscore". `UPPER_CAMEL` = Java and C++ class naming convention, e.g., "UpperCamel". `UPPER_UNDERSCORE` = Java and C++ constant naming convention, e.g., "UPPER_UNDERSCORE".
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* String
+*Type:* STRING
 
-*Validator:* ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
-
-
-
-
-
-## ExtractNestedField(Key)
-
-This transformation is used to extract a field from a nested struct and append it to the parent struct.
-
-### Tip
-
-This transformation is used to manipulate fields in the Key of the record.
-
-
-### Configuration
-
-#### General
-
-
-##### `input.inner.field.name`
-
-The field on the child struct containing the field to be extracted. For example if you wanted the extract `address.state` you would use `state`.
-
-*Importance:* High
-
-*Type:* String
-
-
-
-##### `input.outer.field.name`
-
-The field on the parent struct containing the child struct. For example if you wanted the extract `address.state` you would use `address`.
-
-*Importance:* High
-
-*Type:* String
-
-
-
-##### `output.field.name`
-
-The field to place the extracted value into.
-
-*Importance:* High
-
-*Type:* String
+*Validator:* Matches: ``LOWER_HYPHEN``, ``LOWER_UNDERSCORE``, ``LOWER_CAMEL``, ``UPPER_CAMEL``, ``UPPER_UNDERSCORE``
 
 
 
 
+## [ExtractNestedField](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/ExtractNestedField.html)
 
-## ExtractNestedField(Value)
-
-This transformation is used to extract a field from a nested struct and append it to the parent struct.
-
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.ExtractNestedField$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.ExtractNestedField$Value
+```
 
 
 ### Configuration
@@ -265,9 +173,9 @@ This transformation is used to extract a field from a nested struct and append i
 
 The field on the child struct containing the field to be extracted. For example if you wanted the extract `address.state` you would use `state`.
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* String
+*Type:* STRING
 
 
 
@@ -275,9 +183,9 @@ The field on the child struct containing the field to be extracted. For example 
 
 The field on the parent struct containing the child struct. For example if you wanted the extract `address.state` you would use `address`.
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* String
+*Type:* STRING
 
 
 
@@ -285,20 +193,25 @@ The field on the parent struct containing the child struct. For example if you w
 
 The field to place the extracted value into.
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* String
-
-
+*Type:* STRING
 
 
 
-## ExtractTimestamp(Value)
+
+## [ExtractTimestamp](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/ExtractTimestamp.html)
+
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.ExtractTimestamp$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.ExtractTimestamp$Value
+```
 
 This transformation is used to use a field from the input data to override the timestamp for the record.
-
-
-
 ### Configuration
 
 #### General
@@ -308,21 +221,107 @@ This transformation is used to use a field from the input data to override the t
 
 The field to pull the timestamp from. This must be an int64 or a timestamp.
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* String
-
-
+*Type:* STRING
 
 
 
-## PatternRename(Key)
 
-This transformation is used to rename fields in the key of an input struct based on a regular expression and a replacement string.
+## [HeaderToField](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/HeaderToField.html)
 
-### Tip
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.HeaderToField$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.HeaderToField$Value
+```
 
-This transformation is used to manipulate fields in the Key of the record.
+
+### Configuration
+
+#### General
+
+
+##### `header.mappings`
+
+The mapping of the header to the field in the message.
+
+*Importance:* HIGH
+
+*Type:* LIST
+
+
+
+
+## [NormalizeSchema](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/NormalizeSchema.html)
+
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.NormalizeSchema$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.NormalizeSchema$Value
+```
+
+This transformation is used to convert older schema versions to the latest schema version. This works by keying all of the schemas that are coming into the transformation by their schema name and comparing the version() of the schema. The latest version of a schema will be used. Schemas are discovered as the flow through the transformation. The latest version of a schema is what is used.
+### Configuration
+
+
+
+## [PatternFilter](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/PatternFilter.html)
+
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.PatternFilter$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.PatternFilter$Value
+```
+
+
+### Configuration
+
+#### General
+
+
+##### `pattern`
+
+The regex to test the message with. 
+
+*Importance:* HIGH
+
+*Type:* STRING
+
+*Validator:* com.github.jcustenborder.kafka.connect.utils.config.validators.PatternValidator@4170ee0f
+
+
+
+##### `fields`
+
+The fields to transform.
+
+*Importance:* HIGH
+
+*Type:* LIST
+
+
+
+
+## [PatternRename](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/PatternRename.html)
+
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.PatternRename$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.PatternRename$Value
+```
 
 
 ### Configuration
@@ -334,9 +333,9 @@ This transformation is used to manipulate fields in the Key of the record.
 
 
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* String
+*Type:* STRING
 
 
 
@@ -344,9 +343,9 @@ This transformation is used to manipulate fields in the Key of the record.
 
 
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* String
+*Type:* STRING
 
 
 
@@ -354,9 +353,9 @@ This transformation is used to manipulate fields in the Key of the record.
 
 
 
-*Importance:* Low
+*Importance:* LOW
 
-*Type:* List
+*Type:* LIST
 
 *Default Value:* [CASE_INSENSITIVE]
 
@@ -365,61 +364,120 @@ This transformation is used to manipulate fields in the Key of the record.
 
 
 
+## [SchemaNameToTopic](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/SchemaNameToTopic.html)
 
-## PatternRename(Value)
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.SchemaNameToTopic$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.SchemaNameToTopic$Value
+```
 
-This transformation is used to rename fields in the value of an input struct based on a regular expression and a replacement string.
+This transformation is used to take the name from the schema for the key or value and replace the topic with this value.
+### Configuration
 
 
 
+## [SetMaximumPrecision](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/SetMaximumPrecision.html)
+
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.SetMaximumPrecision$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.SetMaximumPrecision$Value
+```
+
+This transformation is used to ensure that all decimal fields in a struct are below the maximum precision specified.
+### Note
+
+The Confluent AvroConverter uses a default precision of 64 which can be too large for some database systems.
 ### Configuration
 
 #### General
 
 
-##### `field.pattern`
+##### `precision.max`
 
+The maximum precision allowed.
 
+*Importance:* HIGH
 
-*Importance:* High
+*Type:* INT
 
-*Type:* String
-
-
-
-##### `field.replacement`
-
-
-
-*Importance:* High
-
-*Type:* String
-
-
-
-##### `field.pattern.flags`
-
-
-
-*Importance:* Low
-
-*Type:* List
-
-*Default Value:* [CASE_INSENSITIVE]
-
-*Validator:* [UNICODE_CHARACTER_CLASS, CANON_EQ, UNICODE_CASE, DOTALL, LITERAL, MULTILINE, COMMENTS, CASE_INSENSITIVE, UNIX_LINES]
+*Validator:* [1,...,64]
 
 
 
 
+## [SetNull](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/SetNull.html)
 
-## ToJson(Key)
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.SetNull$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.SetNull$Value
+```
 
-This transformation is used to take structured data such as AVRO and output it as JSON by way of the JsonConverter built into Kafka Connect.
 
-### Tip
+### Configuration
 
-This transformation is used to manipulate fields in the Key of the record.
+
+
+## [TimestampNow](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/TimestampNow.html)
+
+```
+com.github.jcustenborder.kafka.connect.transform.common.TimestampNow
+```
+
+This transformation is used to override the timestamp of the incoming record to the time the record is being processed.
+### Configuration
+
+
+
+## [TimestampNowField](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/TimestampNowField.html)
+
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.TimestampNowField$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.TimestampNowField$Value
+```
+
+This transformation is used to set a field with the current timestamp of the system running the transformation.
+### Configuration
+
+#### General
+
+
+##### `fields`
+
+The field(s) that will be inserted with the timestamp of the system.
+
+*Importance:* HIGH
+
+*Type:* LIST
+
+
+
+
+## [ToJSON](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/ToJSON.html)
+
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.ToJSON$Value
+```
 
 
 ### Configuration
@@ -431,48 +489,9 @@ This transformation is used to manipulate fields in the Key of the record.
 
 The connect schema type to output the converted JSON as.
 
-*Importance:* Medium
+*Importance:* MEDIUM
 
-*Type:* String
-
-*Default Value:* STRING
-
-*Validator:* [STRING, BYTES]
-
-
-
-##### `schemas.enable`
-
-Flag to determine if the JSON data should include the schema.
-
-*Importance:* Medium
-
-*Type:* Boolean
-
-*Default Value:* false
-
-
-
-
-
-## ToJson(Value)
-
-This transformation is used to take structured data such as AVRO and output it as JSON by way of the JsonConverter built into Kafka Connect.
-
-
-
-### Configuration
-
-#### General
-
-
-##### `output.schema.type`
-
-The connect schema type to output the converted JSON as.
-
-*Importance:* Medium
-
-*Type:* String
+*Type:* STRING
 
 *Default Value:* STRING
 
@@ -484,60 +503,23 @@ The connect schema type to output the converted JSON as.
 
 Flag to determine if the JSON data should include the schema.
 
-*Importance:* Medium
+*Importance:* MEDIUM
 
-*Type:* Boolean
-
-*Default Value:* false
+*Type:* BOOLEAN
 
 
 
 
+## [ToLong](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/ToLong.html)
 
-## ToLong(Key)
-
-This transformation is used to convert a number to a long
-
-### Tip
-
-This transformation is used to manipulate fields in the Key of the record.
-
-
-### Configuration
-
-#### General
-
-
-##### `charset`
-
-The charset to use when creating the output string.
-
-*Importance:* High
-
-*Type:* String
-
-*Default Value:* UTF-8
-
-
-
-##### `fields`
-
-The fields to transform.
-
-*Importance:* High
-
-*Type:* List
-
-*Default Value:* []
-
-
-
-
-
-## ToLong(Value)
-
-This transformation is used to convert a number to a long
-
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.ToLong$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.ToLong$Value
+```
 
 
 ### Configuration
@@ -545,27 +527,41 @@ This transformation is used to convert a number to a long
 #### General
 
 
-##### `charset`
-
-The charset to use when creating the output string.
-
-*Importance:* High
-
-*Type:* String
-
-*Default Value:* UTF-8
-
-
-
 ##### `fields`
 
 The fields to transform.
 
-*Importance:* High
+*Importance:* HIGH
 
-*Type:* List
+*Type:* LIST
 
-*Default Value:* []
+
+
+
+## [TopicNameToField](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/TopicNameToField.html)
+
+*Key*
+```
+com.github.jcustenborder.kafka.connect.transform.common.TopicNameToField$Key
+```
+*Value*
+```
+com.github.jcustenborder.kafka.connect.transform.common.TopicNameToField$Value
+```
+
+
+### Configuration
+
+#### General
+
+
+##### `field`
+
+The field to insert the topic name.
+
+*Importance:* HIGH
+
+*Type:* STRING
 
 
 
@@ -579,3 +575,10 @@ The fields to transform.
 mvn clean package
 ```
 
+## Contributions
+
+Contributions are always welcomed! Before you start any development please create an issue and
+start a discussion. Create a pull request against your newly created issue and we're happy to see
+if we can merge your pull request. First and foremost any time you're adding code to the code base
+you need to include test coverage. Make sure that you run `mvn clean package` before submitting your
+pull to ensure that all of the tests, checkstyle rules, and the package can be successfully built.
