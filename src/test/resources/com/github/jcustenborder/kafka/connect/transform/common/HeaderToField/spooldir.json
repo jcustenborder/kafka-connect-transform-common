@@ -1,0 +1,90 @@
+{
+  "input": {
+    "topic": "testing",
+    "kafkaPartition": 1,
+    "valueSchema": {
+      "type": "STRUCT",
+      "isOptional": false,
+      "fieldSchemas": {
+        "firstName": {
+          "type": "STRING",
+          "isOptional": true
+        },
+        "lastName": {
+          "type": "STRING",
+          "isOptional": true
+        }
+      }
+    },
+    "value": {
+      "schema": {
+        "type": "STRUCT",
+        "isOptional": false,
+        "fieldSchemas": {
+          "firstName": {
+            "type": "STRING",
+            "isOptional": true
+          },
+          "lastName": {
+            "type": "STRING",
+            "isOptional": true
+          }
+        }
+      },
+      "fieldValues": [
+        {
+          "name": "firstName",
+          "schema": {
+            "type": "STRING",
+            "isOptional": true
+          },
+          "storage": "example"
+        },
+        {
+          "name": "lastName",
+          "schema": {
+            "type": "STRING",
+            "isOptional": true
+          },
+          "storage": "user"
+        }
+      ]
+    },
+    "timestamp": 123412351,
+    "timestampType": "NO_TIMESTAMP_TYPE",
+    "offset": 12345,
+    "headers": [
+      {
+        "name": "file.path",
+        "schema": {
+          "type": "STRING",
+          "isOptional": false
+        },
+        "storage": "/tmp/input/test1.csv"
+      },
+      {
+        "name": "file.name",
+        "schema": {
+          "type": "STRING",
+          "isOptional": false
+        },
+        "storage": "test1.csv"
+      },
+      {
+        "name": "file.last.modified",
+        "schema": {
+          "type": "INT64",
+          "isOptional": false,
+          "name": "org.apache.kafka.connect.data.Timestamp"
+        },
+        "storage": 1610656447123
+      }
+    ]
+  },
+  "description": "The following example takes the output from the Spooldir connector copies headers for the metadata to fields in the value.",
+  "name": "Spooldir metadata",
+  "config": {
+    "header.mappings": "file.path:STRING:file_path,file.name:STRING:file_name,file.last.modified:INT64(Timestamp):file_last_modified"
+  },
+  "childClass": "Value"
+}

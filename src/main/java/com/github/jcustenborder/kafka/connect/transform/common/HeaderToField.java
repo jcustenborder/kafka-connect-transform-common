@@ -15,6 +15,8 @@
  */
 package com.github.jcustenborder.kafka.connect.transform.common;
 
+import com.github.jcustenborder.kafka.connect.utils.config.Description;
+import com.github.jcustenborder.kafka.connect.utils.config.Title;
 import com.github.jcustenborder.kafka.connect.utils.data.SchemaBuilders;
 import com.github.jcustenborder.kafka.connect.utils.transformation.BaseKeyValueTransformation;
 import org.apache.kafka.common.config.ConfigDef;
@@ -32,6 +34,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Title("HeaderToField")
+@Description("This transformation is used to copy the value of a header to a field in the key or " +
+    "value of the record.")
 public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTransformation<R> {
   private static final Logger log = LoggerFactory.getLogger(HeaderToField.class);
 
