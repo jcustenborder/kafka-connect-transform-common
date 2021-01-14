@@ -45,8 +45,28 @@ import java.util.stream.IntStream;
 class HeaderToFieldConfig extends AbstractConfig {
   private static final Logger log = LoggerFactory.getLogger(HeaderToFieldConfig.class);
 
+  static String supportedHeaderTypes() {
+    StringBuilder builder = new StringBuilder();
+    HeaderToFieldMapping.SCHEMA_TYPE_LOOKUP.keySet()
+        .stream()
+        .sorted()
+        .forEach(key -> {
+          builder.append("* ");
+          builder.append(key);
+          builder.append("\n");
+        });
+
+    return builder.toString();
+  }
+
+
   public static final String HEADER_MAPPINGS_CONF = "header.mappings";
-  static final String HEADER_MAPPINGS_DOC = "The mapping of the header to the field in the message.";
+  static final String HEADER_MAPPINGS_DOC = "The mapping of the header to the field in the message. " +
+      "More than one mapping can be specified separated by a comma. " +
+      "The format is `<header name>:<header type>[:field name]`. Supported header types are:\n\n" +
+      supportedHeaderTypes();
+
+
 
   public final List<HeaderToFieldMapping> mappings;
 
