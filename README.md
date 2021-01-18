@@ -119,6 +119,9 @@ com.github.jcustenborder.kafka.connect.transform.common.ChangeTopicCase
 ```
 
 This transformation is used to change the case of a topic.
+
+[✍️ Example](https://rmoff.net/2020/12/23/twelve-days-of-smt-day-12-community-transformations/#_change_the_topic_case) / [🎥 Video](https://www.youtube.com/watch?v=Z7k_6vGRrkc&t=274s)
+
 ### Tip
 
 This transformation will convert a topic name like 'TOPIC_NAME' to `topicName`, or `topic_name`.
@@ -212,6 +215,10 @@ com.github.jcustenborder.kafka.connect.transform.common.ExtractTimestamp$Value
 ```
 
 This transformation is used to use a field from the input data to override the timestamp for the record.
+
+[✍️ Example](https://rmoff.net/2020/12/23/twelve-days-of-smt-day-12-community-transformations/#_add_the_timestamp_of_a_field_to_the_topic_name) / [🎥 Video](https://www.youtube.com/watch?v=Z7k_6vGRrkc&t=430s)
+
+
 ### Configuration
 
 #### General
@@ -452,6 +459,10 @@ com.github.jcustenborder.kafka.connect.transform.common.TimestampNowField$Value
 ```
 
 This transformation is used to set a field with the current timestamp of the system running the transformation.
+
+[✍️ Example](https://rmoff.net/2020/12/23/twelve-days-of-smt-day-12-community-transformations/#_add_the_current_timestamp_to_the_message_payload) / [🎥 Video](https://www.youtube.com/watch?v=Z7k_6vGRrkc&t=679s)
+
+
 ### Configuration
 
 #### General
