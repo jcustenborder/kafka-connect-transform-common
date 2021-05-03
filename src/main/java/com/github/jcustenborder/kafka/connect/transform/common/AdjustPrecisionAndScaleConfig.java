@@ -40,7 +40,7 @@ public class AdjustPrecisionAndScaleConfig extends AbstractConfig {
   }
 
   public static final String PRECISION_VALUE_CONFIG = "precision.value";
-  static final String PRECISION_VALUE_DOC = "Precision to use for precision modification.";
+  static final String PRECISION_VALUE_DOC = "Precision to use for precision modification (default is 38).";
 
   public static final String PRECISION_MODE_CONFIG = "precision.mode";
   static final String PRECISION_MODE_DOC = "Mode to use for precision modification:\n" +
@@ -53,7 +53,7 @@ public class AdjustPrecisionAndScaleConfig extends AbstractConfig {
   public static final String PRECISION_MODE_MAX = "max";
 
   public static final String SCALE_VALUE_CONFIG = "scale.value";
-  static final String SCALE_VALUE_DOC = "Scale to use for scale modification.";
+  static final String SCALE_VALUE_DOC = "Scale to use for scale modification (default is 127).";
 
   // 'scale.mode' and 'negative.scale.mode' could be a single property but it's harder to reason about (9 combinations)
   // Note that a scale cannot both be both negative and undefined, or negative and higher than the (positive) max value
@@ -88,6 +88,7 @@ public class AdjustPrecisionAndScaleConfig extends AbstractConfig {
             ConfigKeyBuilder.of(PRECISION_VALUE_CONFIG, ConfigDef.Type.INT)
                 .documentation(PRECISION_VALUE_DOC)
                 .importance(ConfigDef.Importance.HIGH)
+                .defaultValue(38)
                 .validator(ConfigDef.Range.between(1, 64))
                 .build()
         )
@@ -95,6 +96,7 @@ public class AdjustPrecisionAndScaleConfig extends AbstractConfig {
               ConfigKeyBuilder.of(PRECISION_MODE_CONFIG, ConfigDef.Type.STRING)
                 .documentation(PRECISION_MODE_DOC)
                 .importance(ConfigDef.Importance.HIGH)
+                .defaultValue(PRECISION_MODE_NONE)
                 .validator(ConfigDef.ValidString.in(
                     PRECISION_MODE_NONE,
                     PRECISION_MODE_UNDEFINED,
@@ -106,6 +108,7 @@ public class AdjustPrecisionAndScaleConfig extends AbstractConfig {
             ConfigKeyBuilder.of(SCALE_VALUE_CONFIG, ConfigDef.Type.INT)
                 .documentation(SCALE_VALUE_DOC)
                 .importance(ConfigDef.Importance.HIGH)
+                .defaultValue(127)
                 .validator(ConfigDef.Range.between(0, 127))
                 .build()
         )
@@ -113,6 +116,7 @@ public class AdjustPrecisionAndScaleConfig extends AbstractConfig {
             ConfigKeyBuilder.of(SCALE_MODE_CONFIG, ConfigDef.Type.STRING)
                 .documentation(SCALE_MODE_DOC)
                 .importance(ConfigDef.Importance.HIGH)
+                .defaultValue(SCALE_MODE_NONE)
                 .validator(ConfigDef.ValidString.in(
                     SCALE_MODE_NONE,
                     SCALE_MODE_UNDEFINED,
@@ -124,6 +128,7 @@ public class AdjustPrecisionAndScaleConfig extends AbstractConfig {
             ConfigKeyBuilder.of(SCALE_NEGATIVE_MODE_CONFIG, ConfigDef.Type.STRING)
                     .documentation(SCALE_NEGATIVE_MODE_DOC)
                 .importance(ConfigDef.Importance.HIGH)
+                .defaultValue(SCALE_NEGATIVE_MODE_NONE)
                 .validator(ConfigDef.ValidString.in(
                     SCALE_NEGATIVE_MODE_NONE,
                     SCALE_NEGATIVE_MODE_ZERO,
