@@ -87,7 +87,7 @@ public class AdjustPrecisionAndScale<R extends ConnectRecord<R>> extends BaseKey
       if (Decimal.LOGICAL_NAME.equals(field.schema().name())) {
         String fieldName = field.name();
         BigDecimal originalBigDecimal = (BigDecimal) inputStruct.get(fieldName);
-        log.info("Looking at {}", fieldName);
+        log.trace("Looking at {}", fieldName);
 
         int scale = originalBigDecimal.scale();
         int precision = originalBigDecimal.precision();
@@ -151,7 +151,7 @@ public class AdjustPrecisionAndScale<R extends ConnectRecord<R>> extends BaseKey
         builder.field(field.name(), fieldSchema);
       } else {
         // Not a Decimal
-        log.info("state() - copying field '{}' to new schema.", field.name());
+        log.trace("state() - copying field '{}' to new schema.", field.name());
         builder.field(field.name(), field.schema());
       }
     }
@@ -178,7 +178,7 @@ public class AdjustPrecisionAndScale<R extends ConnectRecord<R>> extends BaseKey
         BigDecimal newBigDecimal = originalBigDecimal.round(mc).setScale(scale, RoundingMode.FLOOR);
         outputStruct.put(fieldName, newBigDecimal);
       } else {
-        log.info("state() - copying field '{}' to new struct.", field.name());
+        log.trace("state() - copying field '{}' to new struct.", field.name());
         outputStruct.put(fieldName, inputStruct.get(field.name()));
       }
     }
