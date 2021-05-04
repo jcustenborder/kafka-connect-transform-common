@@ -27,6 +27,7 @@ public class AdjustPrecisionAndScaleConfig extends AbstractConfig {
   public final String precisionMode;
   public final String scaleMode;
   public final String scaleNegativeMode;
+  public final int undefinedPrecisionValue;
   public final int undefinedScaleValue;
 
   public AdjustPrecisionAndScaleConfig(Map<?, ?> originals) {
@@ -36,6 +37,7 @@ public class AdjustPrecisionAndScaleConfig extends AbstractConfig {
     this.precisionMode = getString(PRECISION_MODE_CONFIG);
     this.scaleMode = getString(SCALE_MODE_CONFIG);
     this.scaleNegativeMode = getString(SCALE_NEGATIVE_MODE_CONFIG);
+    this.undefinedPrecisionValue = getInt(PRECISION_UNDEFINED_VALUE_CONFIG);
     this.undefinedScaleValue = getInt(SCALE_UNDEFINED_VALUE_CONFIG);
   }
 
@@ -51,6 +53,11 @@ public class AdjustPrecisionAndScaleConfig extends AbstractConfig {
   public static final String PRECISION_MODE_NONE = "none";
   public static final String PRECISION_MODE_UNDEFINED = "undefined";
   public static final String PRECISION_MODE_MAX = "max";
+
+  public static final String PRECISION_UNDEFINED_VALUE_CONFIG = "precision.undefined.value";
+  static final String PRECISION_UNDEFINED_VALUE_DOC = "JDBC Source Connectors report undefined scale as 132;" +
+      "use this to specify another value to detect as 'undefined' scale.";
+  static final int PRECISION_UNDEFINED_VALUE_DEFAULT = 132;
 
   public static final String SCALE_VALUE_CONFIG = "scale.value";
   static final String SCALE_VALUE_DOC = "Scale to use for scale modification (default is 127).";
@@ -102,6 +109,13 @@ public class AdjustPrecisionAndScaleConfig extends AbstractConfig {
                     PRECISION_MODE_UNDEFINED,
                     PRECISION_MODE_MAX
                 ))
+                .build()
+        )
+        .define(
+            ConfigKeyBuilder.of(PRECISION_UNDEFINED_VALUE_CONFIG, ConfigDef.Type.INT)
+                .documentation(PRECISION_UNDEFINED_VALUE_DOC)
+                .importance(ConfigDef.Importance.LOW)
+                .defaultValue(PRECISION_UNDEFINED_VALUE_DEFAULT)
                 .build()
         )
         .define(
