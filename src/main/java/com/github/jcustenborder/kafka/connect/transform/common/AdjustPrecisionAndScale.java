@@ -85,61 +85,12 @@ public class AdjustPrecisionAndScale<R extends ConnectRecord<R>> extends BaseKey
     // Only perform logic on 'org.apache.kafka.connect.data.Decimal' fields; otherwise, directly copy field schema to new schema
     for (Field field: inputSchema.fields()) {
       if (Decimal.LOGICAL_NAME.equals(field.schema().name())) {
-//        BigDecimal originalBigDecimal = (BigDecimal) inputStruct.get(field.name());
         log.trace("Looking at {}", field.name());
 
-//        log.info("Start here");
-//        log.info(field.name());
-//        Map<String, String> map = inputSchema.field(field.name()).schema().parameters();
-//        for (String key: map.keySet()) {
-//          log.info("Input parameter {} value {}", key, map.get(key));
-//        }
-//        if (null != originalBigDecimal) {
-//          log.info("Input value: {}", originalBigDecimal.toString());
-//          log.info("Input BD Precision: {}", originalBigDecimal.precision());
-//          log.info("Input BD Scale: {}", originalBigDecimal.scale());
-//
-//        } else {
-//          log.info("null OBD");
-//        }
-        // Validation
-        //    for (Field field: outputSchema.fields()) {
-        //      log.info(field.name());
-        //      log.info(field.schema().name());
-//        log.info("Input value: {}", ((BigDecimal) inputStruct.get(field.name())).toString());
-//        log.info("Input plain value: {}", ((BigDecimal) inputStruct.get(field.name())).toPlainString());
-        //      log.info("Output value: {}", ((BigDecimal) outputStruct.get(field.name())).toPlainString());
-        //      log.info("Output plain value: {}", ((BigDecimal) outputStruct.get(field.name())).toPlainString());
-        //      log.info("Input Schema Precision: {}", inputSchema.field(field.name()).schema().parameters().get(CONNECT_AVRO_DECIMAL_PRECISION_PROP));
-//        log.info("Input BD Precision: {}", ((BigDecimal) inputStruct.get(field.name())).precision());
-        //      log.info("Input Schema Scale: {}", inputSchema.field(field.name()).schema().parameters().get(CONNECT_AVRO_DECIMAL_SCALE_PROP));
-//        log.info("Input BD Scale: {}", ((BigDecimal) inputStruct.get(field.name())).scale());
-        //      log.info("Output Schema Precision: {}", outputSchema.field(field.name()).schema().parameters().get(CONNECT_AVRO_DECIMAL_PRECISION_PROP));
-        //      log.info("Output BD Precision: {}", ((BigDecimal) outputStruct.get(field.name())).precision());
-        //      log.info("Output Schema Scale: {}", outputSchema.field(field.name()).schema().parameters().get(CONNECT_AVRO_DECIMAL_SCALE_PROP));
-        //      log.info("Output BD Scale: {}", ((BigDecimal) outputStruct.get(field.name())).scale());
-        //      log.info("Parameters");
-        //      Map<String, String> map = inputSchema.field(field.name()).schema().parameters();
-        //      for (String key: map.keySet()) {
-        //        log.info("Input parameter {} value {}", key, map.get(key));
-        //      }
-        //      map = outputSchema.field(field.name()).schema().parameters();
-        //      for (String key: map.keySet()) {
-        //        log.info("Output parameter {} value {}", key, map.get(key));
-        //      }
-        //    }
-
         int scale, precision;
-        // If we're coming from a Connector that doesn't have precision defined, default to 'undefined precision'
+        // If we're coming from a Connector that doesn't have precision defined, default to 'undefined precision' (which is 0)
         precision = Integer.parseInt(inputSchema.field(field.name()).schema().parameters().getOrDefault(CONNECT_AVRO_DECIMAL_PRECISION_PROP, "0"));
         scale = Integer.parseInt(inputSchema.field(field.name()).schema().parameters().getOrDefault(CONNECT_AVRO_DECIMAL_SCALE_PROP, "0"));
-//        if (null != originalBigDecimal) {
-//          scale = originalBigDecimal.scale();
-//          precision = originalBigDecimal.precision();
-//        } else {
-//          precision = config.precision;
-//          scale = config.scale;
-//        }
 
         boolean undefinedPrecision = precision == config.undefinedPrecisionValue;
         boolean exceededPrecision = precision > config.precision;
@@ -248,59 +199,6 @@ public class AdjustPrecisionAndScale<R extends ConnectRecord<R>> extends BaseKey
         outputStruct.put(field.name(), inputStruct.get(field.name()));
       }
     }
-
-//    // Validation
-//    for (Field field: outputSchema.fields()) {
-//      log.info("-------------------------------");
-//      log.info(field.name());
-//      log.info(field.schema().name());
-//      BigDecimal inputDecimal = (BigDecimal) inputStruct.get(field.name());
-//      BigDecimal outputDecimal = (BigDecimal) outputStruct.get(field.name());
-//
-//      if (null != inputDecimal) {
-//        log.info("Input value: {}", inputDecimal.toString());
-//        log.info("Input plain value: {}", inputDecimal.toPlainString());
-//        log.info("Output value: {}", outputDecimal.toPlainString());
-//        log.info("Output plain value: {}", outputDecimal.toPlainString());
-//      } else {
-//        log.info("Input/output value null");
-//      }
-//
-//      log.info("Input Schema Precision: {}", inputSchema.field(field.name()).schema().parameters().get(CONNECT_AVRO_DECIMAL_PRECISION_PROP));
-//      if (null != inputDecimal) {
-//        log.info("Input BD Precision: {}", inputDecimal.precision());
-//      } else {
-//        log.info("Input precision null");
-//      }
-//      log.info("Input Schema Scale: {}", inputSchema.field(field.name()).schema().parameters().get(CONNECT_AVRO_DECIMAL_SCALE_PROP));
-//      if (null != inputDecimal) {
-//        log.info("Input BD Scale: {}", inputDecimal.scale());
-//      } else {
-//        log.info("Input scale null");
-//      }
-//
-//      log.info("Output Schema Precision: {}", outputSchema.field(field.name()).schema().parameters().get(CONNECT_AVRO_DECIMAL_PRECISION_PROP));
-//      if (null != outputDecimal) {
-//        log.info("Output BD Precision: {}", outputDecimal.precision());
-//      } else {
-//        log.info("Output precision null");
-//      }
-//      log.info("Output Schema Scale: {}", outputSchema.field(field.name()).schema().parameters().get(CONNECT_AVRO_DECIMAL_SCALE_PROP));
-//      if (null != outputDecimal) {
-//        log.info("Output BD Scale: {}", outputDecimal.scale());
-//      } else {
-//        log.info("Output precision null");
-//      }
-//      log.info("Parameters");
-//      Map<String, String> map = inputSchema.field(field.name()).schema().parameters();
-//      for (String key: map.keySet()) {
-//        log.info("Input parameter {} value {}", key, map.get(key));
-//      }
-//      map = outputSchema.field(field.name()).schema().parameters();
-//      for (String key: map.keySet()) {
-//        log.info("Output parameter {} value {}", key, map.get(key));
-//      }
-//    }
 
     return new SchemaAndValue(outputSchema, outputStruct);
   }
