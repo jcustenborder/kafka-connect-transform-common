@@ -39,7 +39,7 @@ public abstract class ExtractNestedFieldTest extends TransformationTest {
         ImmutableMap.of(
             ExtractNestedFieldConfig.INNER_FIELD_NAME_CONF, "state",
             ExtractNestedFieldConfig.OUTER_FIELD_NAME_CONF, "address",
-            ExtractNestedFieldConfig.OUTPUT_FIELD_NAME_CONF, "state"
+            ExtractNestedFieldConfig.OUTPUT_FIELD_NAME_CONF, "newstate"
         )
     );
 
@@ -57,7 +57,7 @@ public abstract class ExtractNestedFieldTest extends TransformationTest {
         .field("first_name", Schema.STRING_SCHEMA)
         .field("last_name", Schema.STRING_SCHEMA)
         .field("address", innerSchema)
-        .field("state", Schema.STRING_SCHEMA)
+        .field("newstate", Schema.STRING_SCHEMA)
         .build();
     final Struct innerStruct = new Struct(innerSchema)
         .put("city", "Austin")
@@ -70,7 +70,7 @@ public abstract class ExtractNestedFieldTest extends TransformationTest {
         .put("first_name", "test")
         .put("last_name", "developer")
         .put("address", innerStruct)
-        .put("state", "tx");
+        .put("newstate", "tx");
 
     final SinkRecord inputRecord = new SinkRecord(
         "topic",
