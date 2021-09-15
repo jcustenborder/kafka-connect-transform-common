@@ -88,6 +88,7 @@ public abstract class PatternReplaceTest extends TransformationTest {
           PatternReplaceConfig.VALUE_REPLACEMENT_CONF, ""
         )
     );
+    System.err.println("FFS!");
 
     Schema inputSchema = SchemaBuilder.struct()
         .name("testing")

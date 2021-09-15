@@ -26,6 +26,7 @@ import org.apache.kafka.connect.data.Struct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 
@@ -57,20 +58,26 @@ public abstract class PatternReplace<R extends ConnectRecord<R>> extends BaseTra
       String replacedField = (String) toReplace;
       final Matcher fieldMatcher = this.config.pattern.matcher(replacedField);
       String replacedValue = fieldMatcher.replaceAll(this.config.replacement);
-      outputStruct.put(replacedField, replacedValue);
+      outputStruct.put(config.fieldname, replacedValue);
     }
     return new SchemaAndValue(inputSchema, outputStruct);
   }
 
   @Override
   protected SchemaAndValue processMap(R record, Map<String, Object> input) {
-    Map<String, Object> outputMap = input;
-    Object toReplace = input.get(config.fieldname);
-    if (toReplace != null && toReplace instanceof String) {
-      String replacedField = (String) toReplace;
-      final Matcher fieldMatcher = this.config.pattern.matcher(replacedField);
-      String replacedValue = fieldMatcher.replaceAll(this.config.replacement);
-      outputMap.put(replacedField, replacedValue);
+    Map<String, Object> outputMap = new LinkedHashMap<>(input.size());
+    for (final String inputFieldName : input.keySet()) {
+      log.trace("process() - Processing field '{}' value '{}'", inputFieldName, input.get(inputFieldName));
+      if (inputFieldName.equals(config.fieldname)) {
+        String fieldToMatch = (String) input.get(inputFieldName);
+        final Matcher fieldMatcher = this.config.pattern.matcher(fieldToMatch);
+        String replacedValue = fieldMatcher.replaceAll(this.config.replacement);
+        outputMap.put(config.fieldname, replacedValue);
+        log.debug("process() - R
+        geplaced field '{}' with '{}'", inputFieldName, replacedValue);
+      } else {
+        outputMap.put(inputFieldName, input.get(inputFieldName));
+      }
     }
     return new SchemaAndValue(null, outputMap);
   }
