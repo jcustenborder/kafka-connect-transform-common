@@ -73,8 +73,7 @@ public abstract class PatternReplace<R extends ConnectRecord<R>> extends BaseTra
         final Matcher fieldMatcher = this.config.pattern.matcher(fieldToMatch);
         String replacedValue = fieldMatcher.replaceAll(this.config.replacement);
         outputMap.put(config.fieldname, replacedValue);
-        log.debug("process() - R
-        geplaced field '{}' with '{}'", inputFieldName, replacedValue);
+        log.debug("process() - Replaced field '{}' with '{}'", inputFieldName, replacedValue);
       } else {
         outputMap.put(inputFieldName, input.get(inputFieldName));
       }
