@@ -130,6 +130,58 @@ public abstract class PatternReplaceTest extends TransformationTest {
     assertStruct(expectedStruct, actualStruct);
   }
 
+  @Test
+  public void multiple() {
+    this.transformation.configure(
+        ImmutableMap.of(
+          PatternReplaceConfig.FIELD_NAME_CONF, "firstname",
+          PatternReplaceConfig.VALUE_PATTERN_CONF, "/",
+          PatternReplaceConfig.VALUE_REPLACEMENT_CONF, "-"
+        )
+    );
+    System.err.println("FFS!");
+
+    Schema inputSchema = SchemaBuilder.struct()
+        .name("testing")
+        .field("firstname", Schema.STRING_SCHEMA)
+        .field("lastname", Schema.STRING_SCHEMA);
+    Struct inputStruct = new Struct(inputSchema)
+        .put("firstname", "this/has/multiple/tokens/to/replace")
+        .put("lastname", "prefixeduser");
+
+    final Object key = isKey ? inputStruct : null;
+    final Object value = isKey ? null : inputStruct;
+    final Schema keySchema = isKey ? inputSchema : null;
+    final Schema valueSchema = isKey ? null : inputSchema;
+
+    final SinkRecord inputRecord = new SinkRecord(
+        TOPIC,
+        1,
+        keySchema,
+        key,
+        valueSchema,
+        value,
+        1234L
+    );
+    final SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertNotNull(outputRecord);
+
+    final Schema actualSchema = isKey ? outputRecord.keySchema() : outputRecord.valueSchema();
+    final Struct actualStruct = (Struct) (isKey ? outputRecord.key() : outputRecord.value());
+
+    final Schema expectedSchema = SchemaBuilder.struct()
+        .name("testing")
+        .field("firstname", Schema.STRING_SCHEMA)
+        .field("lastname", Schema.STRING_SCHEMA);
+    Struct expectedStruct = new Struct(expectedSchema)
+        .put("firstname", "this-has-multiple-tokens-to-replace")
+        .put("lastname", "prefixeduser");
+
+    assertSchema(expectedSchema, actualSchema);
+    assertStruct(expectedStruct, actualStruct);
+  }
+
+
   public static class KeyTest<R extends ConnectRecord<R>> extends PatternReplaceTest {
     protected KeyTest() {
       super(true);
