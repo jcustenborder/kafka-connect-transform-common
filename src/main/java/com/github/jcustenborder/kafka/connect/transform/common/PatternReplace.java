@@ -55,9 +55,12 @@ public abstract class PatternReplace<R extends ConnectRecord<R>> extends BaseTra
     Struct outputStruct = inputStruct;
     Object toReplace = inputStruct.get(config.fieldname);
     if (toReplace != null && toReplace instanceof String) {
+      String inputFieldName = config.fieldname;
       String replacedField = (String) toReplace;
+      log.trace("process() - Processing struct field '{}' value '{}'", inputFieldName, toReplace);
       final Matcher fieldMatcher = this.config.pattern.matcher(replacedField);
       String replacedValue = fieldMatcher.replaceAll(this.config.replacement);
+      log.trace("process() - Replaced field '{}' with '{}'", inputFieldName, replacedValue);
       outputStruct.put(config.fieldname, replacedValue);
     }
     return new SchemaAndValue(inputSchema, outputStruct);
@@ -67,7 +70,7 @@ public abstract class PatternReplace<R extends ConnectRecord<R>> extends BaseTra
   protected SchemaAndValue processMap(R record, Map<String, Object> input) {
     Map<String, Object> outputMap = new LinkedHashMap<>(input.size());
     for (final String inputFieldName : input.keySet()) {
-      log.trace("process() - Processing field '{}' value '{}'", inputFieldName, input.get(inputFieldName));
+      log.trace("process() - Processing map field '{}' value '{}'", inputFieldName, input.get(inputFieldName));
       if (inputFieldName.equals(config.fieldname)) {
         String fieldToMatch = (String) input.get(inputFieldName);
         final Matcher fieldMatcher = this.config.pattern.matcher(fieldToMatch);
