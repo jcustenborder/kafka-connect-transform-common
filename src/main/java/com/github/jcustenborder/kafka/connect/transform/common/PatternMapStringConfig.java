@@ -25,26 +25,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-class PatternReplaceConfig extends AbstractConfig {
+class PatternMapStringConfig extends AbstractConfig {
 
-  public static final String FIELD_NAME_CONF = "field.name";
-  static final String FIELD_NAME_DOC = "";
+  public static final String SRC_FIELD_NAME_CONF = "src.field.name";
+  static final String SRC_FIELD_NAME_DOC = "The name of the input field";
+
+  public static final String DEST_FIELD_NAME_CONF = "dest.field.name";
+  static final String DEST_FIELD_NAME_DOC = "The name of the output field, set to the same as 'src.field.name' to replace a field value";
 
   public static final String VALUE_PATTERN_CONF = "value.pattern";
-  static final String VALUE_PATTERN_DOC = "";
+  static final String VALUE_PATTERN_DOC = "RegEx pattern which will be replaced";
 
   public static final String VALUE_PATTERN_FLAGS_CONF = "value.pattern.flags";
   static final String VALUE_PATTERN_FLAGS_DOC = "";
 
   public static final String VALUE_REPLACEMENT_CONF = "value.replacement";
-  static final String VALUE_REPLACEMENT_DOC = "";
+  static final String VALUE_REPLACEMENT_DOC = "RegEx to generate output for each match";
 
 
   public final Pattern pattern;
   public final String replacement;
-  public final String fieldname;
+  public final String srcfieldname;
+  public final String destfieldname;
 
-  public PatternReplaceConfig(Map<String, ?> parsedConfig) {
+  public PatternMapStringConfig(Map<String, ?> parsedConfig) {
     super(config(), parsedConfig);
     final String pattern = getString(VALUE_PATTERN_CONF);
     final List<String> flagList = getList(VALUE_PATTERN_FLAGS_CONF);
@@ -55,7 +59,8 @@ class PatternReplaceConfig extends AbstractConfig {
     }
     this.pattern = Pattern.compile(pattern, patternFlags);
     this.replacement = getString(VALUE_REPLACEMENT_CONF);
-    this.fieldname = getString(FIELD_NAME_CONF);
+    this.srcfieldname = getString(SRC_FIELD_NAME_CONF);
+    this.destfieldname = getString(DEST_FIELD_NAME_CONF);
   }
 
   static final Map<String, Integer> FLAG_VALUES;
@@ -81,6 +86,7 @@ class PatternReplaceConfig extends AbstractConfig {
         .define(VALUE_PATTERN_CONF, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, VALUE_PATTERN_DOC)
         .define(VALUE_PATTERN_FLAGS_CONF, ConfigDef.Type.LIST, Arrays.asList("CASE_INSENSITIVE"), ConfigDef.ValidList.in("UNICODE_CHARACTER_CLASS", "CANON_EQ", "UNICODE_CASE", "DOTALL", "LITERAL", "MULTILINE", "COMMENTS", "CASE_INSENSITIVE", "UNIX_LINES"), ConfigDef.Importance.LOW, VALUE_PATTERN_FLAGS_DOC)
         .define(VALUE_REPLACEMENT_CONF, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, VALUE_REPLACEMENT_DOC)
-        .define(FIELD_NAME_CONF, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, FIELD_NAME_DOC);
+        .define(SRC_FIELD_NAME_CONF, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, SRC_FIELD_NAME_DOC)
+        .define(DEST_FIELD_NAME_CONF, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, DEST_FIELD_NAME_DOC);
   }
 }
