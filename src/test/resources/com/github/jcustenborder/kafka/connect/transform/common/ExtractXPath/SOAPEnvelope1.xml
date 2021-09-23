@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<soap:Envelope
+xmlns:soap="http://www.w3.org/2003/05/soap-envelope/"
+soap:encodingStyle="http://www.w3.org/2003/05/soap-encoding">
+
+<soap:Header>
+</soap:Header>
+
+<soap:Body>
+    <abc:Transaction xmlns:abc="http://test.confluent.io/test/abc.xsd">
+        <Transaction xmlns="http://test.confluent.io/test/abc.xsd">
+            <SomeID>12345</SomeID>
+        </Transaction>
+    </abc:Transaction>
+  </soap:Body>
+
+</soap:Envelope>

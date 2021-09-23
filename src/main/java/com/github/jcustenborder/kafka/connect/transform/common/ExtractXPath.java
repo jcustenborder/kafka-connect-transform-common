@@ -106,10 +106,13 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
     if (inData instanceof String) {
       try {
         String inFieldData = (String) inData;
+        log.trace("Input data\n{}", inFieldData);
         InputStream in = new ByteArrayInputStream(inFieldData.getBytes());
         Document doc = builder.parse(in);
         Node node = (Node) xpathE.evaluate(doc, XPathConstants.NODE);
-        return writer.writeToString(node);  
+        String output = writer.writeToString(node);
+        log.trace("Transformed data\n{}", output);
+        return output;  
       } catch (Exception e) {
         log.error("Unable to evaluate XPath {} {}", e.getMessage(), e.toString());
       }

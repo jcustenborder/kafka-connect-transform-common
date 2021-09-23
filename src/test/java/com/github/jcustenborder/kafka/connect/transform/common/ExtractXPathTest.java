@@ -10,27 +10,45 @@ import org.apache.kafka.connect.transforms.Transformation;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.io.File;
+import com.google.common.io.Files;
+import java.io.IOException;
 
 import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
+import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public abstract class ExtractXPathTest extends TransformationTest {
   protected ExtractXPathTest(boolean isKey) {
     super(isKey);
   }
 
-  /**
+  
   @Test
-  public void struct() throws UnsupportedEncodingException {
+  public void SOAPEnvelope() throws UnsupportedEncodingException, IOException {
     this.transformation.configure(
-        ImmutableMap.of(BytesToStringConfig.FIELD_CONFIG, "bytes")
+      ImmutableMap.of(
+        ExtractXPathConfig.IN_FIELD_CONFIG, "in",
+        ExtractXPathConfig.OUT_FIELD_CONFIG, "out",
+        ExtractXPathConfig.XPATH_CONFIG, "//ns1:Transaction/ns1:Transaction",
+        ExtractXPathConfig.NS_PREFIX_CONFIG, "soap,ns1",
+        ExtractXPathConfig.NS_LIST_CONFIG, "http://www.w3.org/2003/05/soap-envelope/,http://test.confluent.io/test/abc.xsd"
+      )
     );
-    final String expected =  "this is a test";
     Schema schema = SchemaBuilder.struct()
-        .field("bytes", Schema.BYTES_SCHEMA)
-        .build();
+      .name("testing")
+      .field("in", Schema.STRING_SCHEMA)
+      .build();
+
+    final byte[] expectedOut = Files.toByteArray(new File("src/test/resources/com/github/jcustenborder/kafka/connect/transform/common/ExtractXPath/Transaction.xml"));
+    final String expected =  new String (expectedOut);
+    
+    final byte[] input = Files.toByteArray(new File("src/test/resources/com/github/jcustenborder/kafka/connect/transform/common/ExtractXPath/SOAPEnvelope1.xml"));
+    String soapEnvelope = new String (input);
     Struct struct = new Struct(schema)
-        .put("bytes", expected.getBytes("UTF-8"));
+      .put("in", soapEnvelope);
 
     final SinkRecord inputRecord = new SinkRecord(
         "topic",
@@ -43,8 +61,23 @@ public abstract class ExtractXPathTest extends TransformationTest {
     );
 
     SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertNotNull(outputRecord);
+    final Schema actualSchema = isKey ? outputRecord.keySchema() : outputRecord.valueSchema();
+    final Struct actualStruct = (Struct) (isKey ? outputRecord.key() : outputRecord.value());
+
+    final Schema expectedSchema = SchemaBuilder.struct()
+        .name("testing")
+        .field("in", Schema.STRING_SCHEMA)
+        .field("out", Schema.STRING_SCHEMA);
+    Struct expectedStruct = new Struct(expectedSchema)
+        .put("in", soapEnvelope)
+        .put("out", expected);
+
+    assertSchema(expectedSchema, actualSchema);
+    assertStruct(expectedStruct, actualStruct);
+  
   }
-  */
+
 
   @Test
   public void checkConfig1() {
