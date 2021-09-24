@@ -72,8 +72,8 @@ public class ExtractXPathConfig extends AbstractConfig {
 
   public static ConfigDef config() {
     return new ConfigDef()
-    .define(IN_FIELD_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, IN_FIELD_DOC)
-    .define(OUT_FIELD_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, OUT_FIELD_DOC)
+    .define(IN_FIELD_CONFIG, ConfigDef.Type.STRING, null, ConfigDef.Importance.HIGH, IN_FIELD_DOC)
+    .define(OUT_FIELD_CONFIG, ConfigDef.Type.STRING, null, ConfigDef.Importance.HIGH, OUT_FIELD_DOC)
     .define(XPATH_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, XPATH_DOC)
     .define(NS_LIST_CONFIG, ConfigDef.Type.STRING, null, ConfigDef.Importance.LOW, NS_LIST_DOC)
     .define(NS_PREFIX_CONFIG, ConfigDef.Type.STRING, null, ConfigDef.Importance.LOW, NS_PREFIX_DOC);

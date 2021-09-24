@@ -27,6 +27,8 @@ import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 import java.util.Map;
 import java.util.LinkedHashMap;
@@ -108,6 +110,7 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
     try {
       
       if (inData instanceof String) {
+        log.trace("Handling XML String");
         String inFieldData = (String) inData;
         in = new ByteArrayInputStream(inFieldData.getBytes());
         Document doc = builder.parse(in);
@@ -116,6 +119,7 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
         return output;  
       } else if (inData instanceof byte[]) {
         byte[] inFieldData = (byte[]) inData;
+        log.trace("Handling byte array, length {}", inFieldData.length);
         in = new ByteArrayInputStream(inFieldData);
         Document doc = builder.parse(in);
         Node node = (Node) xpathE.evaluate(doc, XPathConstants.NODE);
@@ -125,10 +129,24 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
         log.error("Expected a String or byte[], got a {}", inData.getClass().getName());
       }
     } catch (Exception e) {
-      log.error("Unable to evaluate XPath {} {}", e.getMessage(), e.toString());
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      e.printStackTrace(pw);
+      log.error("Unable to evaluate XPath {} {}", e.getMessage(), sw.toString());
     }
     return null;
   }
+
+  @Override
+  protected SchemaAndValue processBytes(R record, Schema inputSchema, byte[] input) {
+    Schema outPutSchema = inputSchema;
+    SchemaAndValue retVal = null;
+    log.trace("process() - Processing bytes");
+    Object extractedValue = extractXPathString(input);
+    retVal = new SchemaAndValue(outPutSchema, extractedValue);
+    return retVal;
+  }
+  
   @Override
   protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct inputStruct) {
     Schema outPutSchema = inputSchema;

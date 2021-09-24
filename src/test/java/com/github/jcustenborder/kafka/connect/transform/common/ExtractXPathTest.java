@@ -81,6 +81,39 @@ public abstract class ExtractXPathTest extends TransformationTest {
   public void SOAPEnvelopeByte() throws UnsupportedEncodingException, IOException {
     this.transformation.configure(
       ImmutableMap.of(
+        ExtractXPathConfig.XPATH_CONFIG, "//ns1:Transaction/ns1:Transaction",
+        ExtractXPathConfig.NS_PREFIX_CONFIG, "soap,ns1",
+        ExtractXPathConfig.NS_LIST_CONFIG, "http://www.w3.org/2003/05/soap-envelope/,http://test.confluent.io/test/abc.xsd"
+      )
+    );
+
+    final byte[] expected = Files.toByteArray(new File("src/test/resources/com/github/jcustenborder/kafka/connect/transform/common/ExtractXPath/Transaction.xml"));
+    
+    final byte[] input = Files.toByteArray(new File("src/test/resources/com/github/jcustenborder/kafka/connect/transform/common/ExtractXPath/SOAPEnvelope1.xml"));
+
+    final SinkRecord inputRecord = new SinkRecord(
+        "topic",
+        1,
+        null,
+        null,
+        Schema.BYTES_SCHEMA,
+        input,
+        1L
+    );
+
+    SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertNotNull(outputRecord);
+    final Schema actualSchema = isKey ? outputRecord.keySchema() : outputRecord.valueSchema();
+    final byte[] actualStruct = (byte[]) (isKey ? outputRecord.key() : outputRecord.value());
+
+    assertSchema(Schema.BYTES_SCHEMA, actualSchema);
+    assertEquals(actualStruct.length, expected.length);
+  
+  }
+  @Test
+  public void SOAPEnvelopeStructByte() throws UnsupportedEncodingException, IOException {
+    this.transformation.configure(
+      ImmutableMap.of(
         ExtractXPathConfig.IN_FIELD_CONFIG, "in",
         ExtractXPathConfig.OUT_FIELD_CONFIG, "out",
         ExtractXPathConfig.XPATH_CONFIG, "//ns1:Transaction/ns1:Transaction",
