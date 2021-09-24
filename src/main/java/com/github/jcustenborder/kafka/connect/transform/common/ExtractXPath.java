@@ -1,18 +1,18 @@
 /**
- * Copyright © 2017 Jeremy Custenborder (jcustenborder@gmail.com)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright © 2017 Jeremy Custenborder (jcustenborder@gmail.com)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 package com.github.jcustenborder.kafka.connect.transform.common;
 
 import com.github.jcustenborder.kafka.connect.utils.config.Description;
@@ -49,28 +49,28 @@ import org.apache.ws.commons.util.NamespaceContextImpl;
 
 public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTransformation<R> {
   private static final Logger log = LoggerFactory.getLogger(ExtractXPath.class);
-
-
+  
+  
   ExtractXPathConfig config;
   public ExtractXPathConfig theConfig() {
     return this.config;
   }
-
+  
   DocumentBuilder builder;
   XPath xpath;
   XPathExpression xpathE;
   LSSerializer writer;
-
+  
   @Override
   public ConfigDef config() {
     return ExtractXPathConfig.config();
   }
-
+  
   @Override
   public void close() {
-
+    
   }
-
+  
   @Override
   public void configure(Map<String, ?> settings) {
     this.config = new ExtractXPathConfig(settings);
@@ -90,7 +90,7 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
         xpath.setNamespaceContext(nsContext);
       }
       xpathE = xpath.compile(config.xpath);
-
+      
       DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
       DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS");
       writer = impl.createLSSerializer();
@@ -98,26 +98,34 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
       log.error("Unable to create transformer {} {}", e.getMessage(), e.toString());
     }
   }
-
+  
   /**
-   * 
-   */
-  private String extractXPathString(Object inData) {
-    if (inData instanceof String) {
-      try {
+  * 
+  */
+  private Object extractXPathString(Object inData) {
+    log.trace("extractXPathString Data type {}", inData.getClass());
+    InputStream in = null;
+    try {
+      
+      if (inData instanceof String) {
         String inFieldData = (String) inData;
-        log.trace("Input data\n{}", inFieldData);
-        InputStream in = new ByteArrayInputStream(inFieldData.getBytes());
+        in = new ByteArrayInputStream(inFieldData.getBytes());
         Document doc = builder.parse(in);
         Node node = (Node) xpathE.evaluate(doc, XPathConstants.NODE);
         String output = writer.writeToString(node);
-        log.trace("Transformed data\n{}", output);
         return output;  
-      } catch (Exception e) {
-        log.error("Unable to evaluate XPath {} {}", e.getMessage(), e.toString());
+      } else if (inData instanceof byte[]) {
+        byte[] inFieldData = (byte[]) inData;
+        in = new ByteArrayInputStream(inFieldData);
+        Document doc = builder.parse(in);
+        Node node = (Node) xpathE.evaluate(doc, XPathConstants.NODE);
+        String output = writer.writeToString(node);
+        return output.getBytes();  
+      } else {
+        log.error("Expected a String or byte[], got a {}", inData.getClass().getName());
       }
-    } else {
-      log.error("Expected a String, got a {}", inData.getClass().getName());
+    } catch (Exception e) {
+      log.error("Unable to evaluate XPath {} {}", e.getMessage(), e.toString());
     }
     return null;
   }
@@ -155,7 +163,7 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
         final Object value = inputStruct.get(inputFieldName);
         outputStruct.put(inputFieldName, value);
         if (inputFieldName.equals(config.inputField)) {
-          String extractedValue = extractXPathString(value);
+          Object extractedValue = extractXPathString(value);
           outputStruct.put(config.outputField, extractedValue);
         }
       }
@@ -167,7 +175,7 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
         String inputFieldName = config.inputField;
         String replacedField = (String) toReplace;
         log.trace("process() - Processing struct field '{}' value '{}'", inputFieldName, toReplace);
-        String extractedValue = extractXPathString(replacedField);
+        Object extractedValue = extractXPathString(replacedField);
         if (config.outputField.equals(config.inputField)) {
           log.debug("process() - Replaced struct field '{}' with '{}'", inputFieldName, extractedValue);
         } else {
@@ -179,7 +187,7 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
     }
     return retVal;
   }
-
+  
   @Override
   protected SchemaAndValue processMap(R record, Map<String, Object> input) {
     Map<String, Object> outputMap = new LinkedHashMap<>(input.size());
@@ -188,7 +196,7 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
       log.trace("process() - Processing map field '{}' value '{}'", inputFieldName, input.get(inputFieldName));
       if (inputFieldName.equals(config.inputField)) {
         String fieldToMatch = (String) input.get(inputFieldName);
-        String replacedValue = extractXPathString(fieldToMatch);
+        Object replacedValue = extractXPathString(fieldToMatch);
         outputMap.put(config.outputField, replacedValue);
         if (config.outputField.equals(config.inputField)) {
           log.debug("process() - Replaced map field '{}' with '{}'", inputFieldName, replacedValue);
@@ -199,48 +207,48 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
     }
     return new SchemaAndValue(null, outputMap);
   }
-
+  
   @Title("ExtractXPathConfig(Key)")
   @Description("This transformation is used to take structured data such as AVRO and output it as " +
       "JSON by way of the JsonConverter built into Kafka Connect.")
   @DocumentationTip("This transformation is used to manipulate fields in the Key of the record.")
   public static class Key<R extends ConnectRecord<R>> extends ExtractXPath<R> {
-
+    
     @Override
     public R apply(R r) {
       final SchemaAndValue transformed = process(r, r.keySchema(), r.key());
-
+      
       return r.newRecord(
-          r.topic(),
-          r.kafkaPartition(),
-          transformed.schema(),
-          transformed.value(),
-          r.valueSchema(),
-          r.value(),
-          r.timestamp()
+      r.topic(),
+      r.kafkaPartition(),
+      transformed.schema(),
+      transformed.value(),
+      r.valueSchema(),
+      r.value(),
+      r.timestamp()
       );
     }
   }
-
+  
   @Title("ExtractXPathConfig(Value)")
   @Description("This transformation is used to take structured data such as AVRO and output it as " +
       "JSON by way of the JsonConverter built into Kafka Connect.")
   public static class Value<R extends ConnectRecord<R>> extends ExtractXPath<R> {
-
+    
     @Override
     public R apply(R r) {
       final SchemaAndValue transformed = process(r, r.valueSchema(), r.value());
-
+      
       return r.newRecord(
-          r.topic(),
-          r.kafkaPartition(),
-          r.keySchema(),
-          r.key(),
-          transformed.schema(),
-          transformed.value(),
-          r.timestamp()
+      r.topic(),
+      r.kafkaPartition(),
+      r.keySchema(),
+      r.key(),
+      transformed.schema(),
+      transformed.value(),
+      r.timestamp()
       );
     }
   }
-
+  
 }

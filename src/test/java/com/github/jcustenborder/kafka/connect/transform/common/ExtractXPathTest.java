@@ -77,6 +77,55 @@ public abstract class ExtractXPathTest extends TransformationTest {
     assertStruct(expectedStruct, actualStruct);
   
   }
+  @Test
+  public void SOAPEnvelopeByte() throws UnsupportedEncodingException, IOException {
+    this.transformation.configure(
+      ImmutableMap.of(
+        ExtractXPathConfig.IN_FIELD_CONFIG, "in",
+        ExtractXPathConfig.OUT_FIELD_CONFIG, "out",
+        ExtractXPathConfig.XPATH_CONFIG, "//ns1:Transaction/ns1:Transaction",
+        ExtractXPathConfig.NS_PREFIX_CONFIG, "soap,ns1",
+        ExtractXPathConfig.NS_LIST_CONFIG, "http://www.w3.org/2003/05/soap-envelope/,http://test.confluent.io/test/abc.xsd"
+      )
+    );
+    Schema schema = SchemaBuilder.struct()
+      .name("testing")
+      .field("in", Schema.BYTES_SCHEMA)
+      .build();
+
+    final byte[] expected = Files.toByteArray(new File("src/test/resources/com/github/jcustenborder/kafka/connect/transform/common/ExtractXPath/Transaction.xml"));
+    
+    final byte[] input = Files.toByteArray(new File("src/test/resources/com/github/jcustenborder/kafka/connect/transform/common/ExtractXPath/SOAPEnvelope1.xml"));
+    Struct struct = new Struct(schema)
+      .put("in", input);
+
+    final SinkRecord inputRecord = new SinkRecord(
+        "topic",
+        1,
+        null,
+        null,
+        schema,
+        struct,
+        1L
+    );
+
+    SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertNotNull(outputRecord);
+    final Schema actualSchema = isKey ? outputRecord.keySchema() : outputRecord.valueSchema();
+    final Struct actualStruct = (Struct) (isKey ? outputRecord.key() : outputRecord.value());
+
+    final Schema expectedSchema = SchemaBuilder.struct()
+        .name("testing")
+        .field("in", Schema.BYTES_SCHEMA)
+        .field("out", Schema.BYTES_SCHEMA);
+    Struct expectedStruct = new Struct(expectedSchema)
+        .put("in", input)
+        .put("out", expected);
+
+    assertSchema(expectedSchema, actualSchema);
+    assertStruct(expectedStruct, actualStruct);
+  
+  }
 
 
   @Test
