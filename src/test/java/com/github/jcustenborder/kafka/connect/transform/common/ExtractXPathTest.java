@@ -13,6 +13,8 @@ import java.io.UnsupportedEncodingException;
 import java.io.File;
 import com.google.common.io.Files;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,6 +26,7 @@ public abstract class ExtractXPathTest extends TransformationTest {
   protected ExtractXPathTest(boolean isKey) {
     super(isKey);
   }
+  private static final Logger log = LoggerFactory.getLogger(ExtractXPathTest.class);
 
   
   @Test
@@ -101,10 +104,12 @@ public abstract class ExtractXPathTest extends TransformationTest {
         1L
     );
 
+    log.trace("Input: {}", new String(input));
     SinkRecord outputRecord = this.transformation.apply(inputRecord);
     assertNotNull(outputRecord);
     final Schema actualSchema = isKey ? outputRecord.keySchema() : outputRecord.valueSchema();
     final byte[] actualStruct = (byte[]) (isKey ? outputRecord.key() : outputRecord.value());
+    log.trace("Output: {}", new String(actualStruct));
 
     assertSchema(Schema.BYTES_SCHEMA, actualSchema);
     assertEquals(actualStruct.length, expected.length);

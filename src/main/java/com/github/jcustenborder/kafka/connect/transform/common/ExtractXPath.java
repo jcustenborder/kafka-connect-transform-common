@@ -141,12 +141,13 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
   protected SchemaAndValue processBytes(R record, Schema inputSchema, byte[] input) {
     Schema outPutSchema = inputSchema;
     SchemaAndValue retVal = null;
-    log.trace("process() - Processing bytes");
-    Object extractedValue = extractXPathString(input);
-    retVal = new SchemaAndValue(outPutSchema, extractedValue);
+    log.trace("process() - Processing bytes Input: {}", new String(input));
+    Object outputValue = extractXPathString(input);
+    log.trace("process() - Output: {}", new String((byte[]) outputValue));
+    retVal = new SchemaAndValue(outPutSchema, outputValue);
     return retVal;
   }
-  
+
   @Override
   protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct inputStruct) {
     Schema outPutSchema = inputSchema;
@@ -227,8 +228,8 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
   }
   
   @Title("ExtractXPathConfig(Key)")
-  @Description("This transformation is used to take structured data such as AVRO and output it as " +
-      "JSON by way of the JsonConverter built into Kafka Connect.")
+  @Description("This transformation is used to take XML data and apply an XPath to  " +
+      "it, returning a new XML document.")
   @DocumentationTip("This transformation is used to manipulate fields in the Key of the record.")
   public static class Key<R extends ConnectRecord<R>> extends ExtractXPath<R> {
     
@@ -249,8 +250,8 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
   }
   
   @Title("ExtractXPathConfig(Value)")
-  @Description("This transformation is used to take structured data such as AVRO and output it as " +
-      "JSON by way of the JsonConverter built into Kafka Connect.")
+  @Description("This transformation is used to take XML data and apply an XPath to  " +
+      "it, returning a new XML document.")
   public static class Value<R extends ConnectRecord<R>> extends ExtractXPath<R> {
     
     @Override
