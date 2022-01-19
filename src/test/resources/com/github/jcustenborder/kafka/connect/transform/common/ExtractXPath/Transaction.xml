@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-16"?>
+<Transaction xmlns="http://test.confluent.io/test/abc.xsd">
+            <SomeID>12345</SomeID>
+        </Transaction>

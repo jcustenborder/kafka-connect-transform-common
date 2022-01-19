@@ -76,6 +76,16 @@
             <version>[0.3.33,0.3.1000)</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons</groupId>
+            <artifactId>ws-commons-util</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.12.1</version>
+        </dependency>        
     </dependencies>
     <build>
         <plugins>
