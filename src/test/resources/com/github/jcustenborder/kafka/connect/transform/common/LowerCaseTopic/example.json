@@ -1,0 +1,15 @@
+{
+  "input" : {
+    "topic" : "TestTopic",
+    "kafkaPartition" : 1,
+    "key" : "",
+    "value" : "",
+    "timestamp" : 12341312,
+    "timestampType" : "NO_TIMESTAMP_TYPE",
+    "offset" : 1234123,
+    "headers" : [ ]
+  },
+  "description" : "This example will change the topic name to be all lower case.",
+  "name" : "Example",
+  "config" : { }
+}
