@@ -26,6 +26,7 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.header.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +101,32 @@ public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTrans
     });
   }
 
+  @Override
+  protected SchemaAndValue processMap(R record, Map<String, Object> input) {
+    if (record.headers().isEmpty()) {
+      return new SchemaAndValue(null, input);
+    }
+
+    Map<String, Object> headers = new HashMap<>();
+    if (this.config.mappings.isEmpty()) {
+      for (Header header: record.headers()) {
+        headers.put(header.key(), header.value());
+        break;
+      }
+    } else {
+      this.config.mappings.forEach(mapping -> {
+        for (Header header: record.headers()) {
+          if (header.key().equals(mapping.header)) {
+            headers.put(header.key(), header.value());
+            break;
+          }
+        }
+      });
+    }
+
+    input.put("_headers", headers);
+    return new SchemaAndValue(null, input);
+  }
 
   @Override
   protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
