@@ -117,7 +117,7 @@ public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTrans
       this.config.mappings.forEach(mapping -> {
         for (Header header: record.headers()) {
           if (header.key().equals(mapping.header)) {
-            headers.put(header.key(), header.value());
+            headers.put(mapping.field, header.value());
             break;
           }
         }
