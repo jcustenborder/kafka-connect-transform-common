@@ -45,14 +45,14 @@ class TimestampNowFieldConfig extends AbstractConfig {
   public final Long addAmount;
   public final ChronoUnit addChronoUnit;
 
-  public final TargetType targetType;
+  public final TimestampNowFieldTargetType targetType;
 
   public TimestampNowFieldConfig(Map<?, ?> originals) {
     super(config(), originals);
     this.fields = ConfigUtils.getSet(this, FIELDS_CONF);
     this.addAmount = getLong(ADD_AMOUNT_CONF);
     this.addChronoUnit = ChronoUnit.valueOf(getString(ADD_CHRONO_UNIT_CONF));
-    this.targetType = ConfigUtils.getEnum(TargetType.class, this, TARGET_TYPE_CONF);
+    this.targetType = ConfigUtils.getEnum(TimestampNowFieldTargetType.class, this, TARGET_TYPE_CONF);
   }
 
   public static ConfigDef config() {
@@ -80,13 +80,8 @@ class TimestampNowFieldConfig extends AbstractConfig {
                 .documentation(TARGET_TYPE_DOC)
                 .importance(ConfigDef.Importance.LOW)
                 .defaultValue("Date")
-                .validator(Validators.validEnum(TargetType.class))
+                .validator(Validators.validEnum(TimestampNowFieldTargetType.class))
                 .build()
         );
-  }
-
-  public enum TargetType {
-    Date(),
-    Unix(),
   }
 }

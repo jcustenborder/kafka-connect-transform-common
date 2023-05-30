@@ -24,9 +24,10 @@ import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.*;
 
-import java.time.Instant;
-import java.util.Date;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Title("TimestampNowField")
@@ -59,40 +60,20 @@ public abstract class TimestampNowField<R extends ConnectRecord<R>> extends Base
 
   Map<Schema, Schema> schemaCache = new HashMap<>();
 
-  static boolean isTimestampSchema(Schema schema) {
-    return (Timestamp.SCHEMA.type() == schema.type() && Timestamp.SCHEMA.name().equals(schema.name()));
-  }
-
   @Override
   protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
     Object timestamp = getFormattedTimestamp();
     Schema outputSchema = schemaCache.computeIfAbsent(inputSchema, schema -> {
       Collection<String> replaceFields = schema.fields().stream()
           .filter(f -> this.config.fields.contains(f.name()))
-          .filter(f -> {
-            switch (this.config.targetType) {
-              default:
-              case Date:
-                return !isTimestampSchema(f.schema());
-              case Unix:
-                return f.schema().type() != Schema.Type.INT64 || f.schema().name() != null;
-            }
-          })
+          .filter(f -> !this.config.targetType.isMatchingSchema(f.schema()))
           .map(Field::name)
           .collect(Collectors.toList());
       SchemaBuilder builder = SchemaBuilders.of(schema, replaceFields);
       this.config.fields.forEach(timestampField -> {
         Field existingField = builder.field(timestampField);
         if (null == existingField) {
-          switch (config.targetType) {
-            default:
-            case Date:
-              builder.field(timestampField, Timestamp.SCHEMA);
-              break;
-            case Unix:
-              builder.field(timestampField, Schema.INT64_SCHEMA);
-              break;
-          }
+          builder.field(timestampField, this.config.targetType.getSchema());
         }
       });
       return builder.build();
@@ -107,18 +88,11 @@ public abstract class TimestampNowField<R extends ConnectRecord<R>> extends Base
   }
 
   private Object getFormattedTimestamp() {
-    long desiredTime = this.time.milliseconds();
+    long desiredTimeInMillis = this.time.milliseconds();
     if (config.addAmount > 0) {
-      desiredTime += config.addChronoUnit.getDuration().toMillis();
+      desiredTimeInMillis += config.addChronoUnit.getDuration().toMillis();
     }
-    Instant desiredInstant = Instant.ofEpochMilli(desiredTime);
-    switch (config.targetType) {
-      default:
-      case Date:
-        return Date.from(desiredInstant);
-      case Unix:
-        return desiredInstant.getEpochSecond();
-    }
+    return this.config.targetType.getFormattedTimestamp(desiredTimeInMillis);
   }
 
   @Override

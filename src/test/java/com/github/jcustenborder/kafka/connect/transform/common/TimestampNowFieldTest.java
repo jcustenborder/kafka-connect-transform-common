@@ -43,15 +43,15 @@ public class TimestampNowFieldTest {
   }
 
   enum StructUseCases {
-    Date(TimestampNowFieldConfig.TargetType.Date, Timestamp.SCHEMA, timestamp),
-    Unix(TimestampNowFieldConfig.TargetType.Unix, Schema.INT64_SCHEMA, timestamp.toInstant().getEpochSecond());
+    Date(TimestampNowFieldTargetType.DATE, Timestamp.SCHEMA, timestamp),
+    Unix(TimestampNowFieldTargetType.UNIX, Schema.INT64_SCHEMA, timestamp.toInstant().getEpochSecond());
 
-    public final TimestampNowFieldConfig.TargetType targetType;
+    public final TimestampNowFieldTargetType targetType;
     public final Schema schema;
     public final Object value;
 
 
-    StructUseCases(TimestampNowFieldConfig.TargetType targetType, Schema schema, Object value) {
+    StructUseCases(TimestampNowFieldTargetType targetType, Schema schema, Object value) {
       this.targetType = targetType;
       this.schema = schema;
       this.value = value;
