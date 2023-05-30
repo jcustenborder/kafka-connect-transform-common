@@ -289,7 +289,7 @@ public class TimestampNowFieldTest {
     this.transformation.configure(
             ImmutableMap.of(
                     TimestampNowFieldConfig.FIELDS_CONF, "timestamp",
-                    TimestampNowFieldConfig.TARGET_TYPE_CONF, "Unix"
+                    TimestampNowFieldConfig.TARGET_TYPE_CONF, "UNIX"
             )
     );
     final Map<String, Object> expected = ImmutableMap.of(

@@ -22,13 +22,18 @@ import com.github.jcustenborder.kafka.connect.utils.transformation.BaseKeyValueT
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.connect.connector.ConnectRecord;
-import org.apache.kafka.connect.data.*;
+import org.apache.kafka.connect.data.Field;
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaAndValue;
+import org.apache.kafka.connect.data.SchemaBuilder;
+import org.apache.kafka.connect.data.Struct;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 
 @Title("TimestampNowField")
 @Description("This transformation is used to set a field with the current timestamp of the system running the " +

@@ -79,7 +79,7 @@ class TimestampNowFieldConfig extends AbstractConfig {
             ConfigKeyBuilder.of(TARGET_TYPE_CONF, ConfigDef.Type.STRING)
                 .documentation(TARGET_TYPE_DOC)
                 .importance(ConfigDef.Importance.LOW)
-                .defaultValue("Date")
+                .defaultValue("DATE")
                 .validator(Validators.validEnum(TimestampNowFieldTargetType.class))
                 .build()
         );
