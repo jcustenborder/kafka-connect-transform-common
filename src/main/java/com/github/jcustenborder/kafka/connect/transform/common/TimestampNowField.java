@@ -22,20 +22,11 @@ import com.github.jcustenborder.kafka.connect.utils.transformation.BaseKeyValueT
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.connect.connector.ConnectRecord;
-import org.apache.kafka.connect.data.Field;
-import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.data.SchemaAndValue;
-import org.apache.kafka.connect.data.SchemaBuilder;
-import org.apache.kafka.connect.data.Struct;
-import org.apache.kafka.connect.data.Timestamp;
+import org.apache.kafka.connect.data.*;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Title("TimestampNowField")
@@ -84,7 +75,7 @@ public abstract class TimestampNowField<R extends ConnectRecord<R>> extends Base
               case Date:
                 return !isTimestampSchema(f.schema());
               case Unix:
-                return f.schema().type() != Schema.Type.INT64;
+                return f.schema().type() != Schema.Type.INT64 || f.schema().name() != null;
             }
           })
           .map(Field::name)
