@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 
@@ -24,13 +23,13 @@ import static org.mockito.Mockito.when;
 public class TimestampNowFieldTest {
 
   TimestampNowField<SinkRecord> transformation;
-  static Date timestamp = new Date(1586963336123L);
+  static Date timestampNow = new Date(1586963336123L);
 
   @BeforeEach
   public void beforeEach() {
     this.transformation = new TimestampNowField.Value<>();
     Time time = mock(Time.class);
-    when(time.milliseconds()).thenReturn(timestamp.getTime());
+    when(time.milliseconds()).thenReturn(timestampNow.getTime());
     this.transformation.time = time;
     this.transformation.configure(
         ImmutableMap.of(TimestampNowFieldConfig.FIELDS_CONF, "timestamp")
@@ -43,8 +42,8 @@ public class TimestampNowFieldTest {
   }
 
   enum StructUseCases {
-    Date(TimestampNowFieldTargetType.DATE, Timestamp.SCHEMA, timestamp),
-    Unix(TimestampNowFieldTargetType.UNIX, Schema.INT64_SCHEMA, timestamp.toInstant().getEpochSecond());
+    Date(TimestampNowFieldTargetType.DATE, Timestamp.SCHEMA, timestampNow),
+    Unix(TimestampNowFieldTargetType.UNIX, Schema.INT64_SCHEMA, timestampNow.toInstant().getEpochSecond());
 
     public final TimestampNowFieldTargetType targetType;
     public final Schema schema;
@@ -146,12 +145,12 @@ public class TimestampNowFieldTest {
   }
 
   @Test
-  public void structAddOneDay() {
-    Date timestampPlusOneDay = Date.from(timestamp.toInstant().plus(1, ChronoUnit.DAYS));
+  public void structAddTwoDays() {
+    Date timestampNowPlusTwoDays = new Date(1587136136123L);
     this.transformation.configure(
             ImmutableMap.of(
                     TimestampNowFieldConfig.FIELDS_CONF, "timestamp",
-                    TimestampNowFieldConfig.ADD_AMOUNT_CONF, "1",
+                    TimestampNowFieldConfig.ADD_AMOUNT_CONF, "2",
                     TimestampNowFieldConfig.ADD_CHRONO_UNIT_CONF, "DAYS"
             )
     );
@@ -172,7 +171,7 @@ public class TimestampNowFieldTest {
     final Struct expectedStruct = new Struct(expectedSchema)
             .put("firstName", "example")
             .put("lastName", "user")
-            .put("timestamp", timestampPlusOneDay);
+            .put("timestamp", timestampNowPlusTwoDays);
     final SinkRecord input = new SinkRecord(
             "test",
             1,
@@ -236,7 +235,7 @@ public class TimestampNowFieldTest {
   @Test
   public void mapFieldMissing() {
     final Map<String, Object> expected = ImmutableMap.of(
-        "firstName", "example", "lastName", "user", "timestamp", timestamp
+        "firstName", "example", "lastName", "user", "timestamp", timestampNow
     );
     final SinkRecord input = new SinkRecord(
         "test",
@@ -255,17 +254,17 @@ public class TimestampNowFieldTest {
   }
 
   @Test
-  public void mapAddOneDay() {
-    Date timestampPlusOneDay = Date.from(timestamp.toInstant().plus(1, ChronoUnit.DAYS));
+  public void mapAddThreeHours() {
+    Date timestampPlusThreeHours = new Date(1586974136123L);
     this.transformation.configure(
             ImmutableMap.of(
                     TimestampNowFieldConfig.FIELDS_CONF, "timestamp",
-                    TimestampNowFieldConfig.ADD_AMOUNT_CONF, "1",
-                    TimestampNowFieldConfig.ADD_CHRONO_UNIT_CONF, "DAYS"
+                    TimestampNowFieldConfig.ADD_AMOUNT_CONF, "3",
+                    TimestampNowFieldConfig.ADD_CHRONO_UNIT_CONF, "HOURS"
             )
     );
     final Map<String, Object> expected = ImmutableMap.of(
-            "firstName", "example", "lastName", "user", "timestamp", timestampPlusOneDay
+            "firstName", "example", "lastName", "user", "timestamp", timestampPlusThreeHours
     );
     final SinkRecord input = new SinkRecord(
             "test",
@@ -285,7 +284,7 @@ public class TimestampNowFieldTest {
 
   @Test
   public void mapFormattedAsUnix() {
-    long timestampFormattedAsUnix = timestamp.toInstant().getEpochSecond();
+    long timestampFormattedAsUnix = timestampNow.toInstant().getEpochSecond();
     this.transformation.configure(
             ImmutableMap.of(
                     TimestampNowFieldConfig.FIELDS_CONF, "timestamp",

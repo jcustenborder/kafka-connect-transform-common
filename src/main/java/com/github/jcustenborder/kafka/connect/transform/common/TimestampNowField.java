@@ -95,7 +95,7 @@ public abstract class TimestampNowField<R extends ConnectRecord<R>> extends Base
   private Object getFormattedTimestamp() {
     long desiredTimeInMillis = this.time.milliseconds();
     if (config.addAmount > 0) {
-      desiredTimeInMillis += config.addChronoUnit.getDuration().toMillis();
+      desiredTimeInMillis += config.addAmount * config.addChronoUnit.getDuration().toMillis();
     }
     return this.config.targetType.getFormattedTimestamp(desiredTimeInMillis);
   }
