@@ -30,21 +30,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransformation<R> {
   private static final Logger log = LoggerFactory.getLogger(ChangeCase.class);
-
-  class State {
-    public final Map<String, String> columnMapping;
-    public final Schema schema;
-
-    State(Map<String, String> columnMapping, Schema schema) {
-      this.columnMapping = columnMapping;
-      this.schema = schema;
-    }
-  }
 
   private ChangeCaseConfig config;
 
@@ -63,39 +54,89 @@ public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransfo
     this.config = new ChangeCaseConfig(map);
   }
 
-  Map<Schema, State> schemaState = new HashMap<>();
+  Map<Schema, Schema> schemaState = new HashMap<>();
 
   @Override
   protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
-    final State state = this.schemaState.computeIfAbsent(inputSchema, schema -> {
-      final SchemaBuilder builder = SchemaBuilder.struct();
-      if (!Strings.isNullOrEmpty(schema.name())) {
-        builder.name(schema.name());
-      }
-      if (schema.isOptional()) {
-        builder.optional();
-      }
+    final Schema outputSchema = this.schemaState.computeIfAbsent(inputSchema, schema -> convertSchema(schema));
+    final Struct outputStruct = convertStruct(inputSchema, outputSchema, input);
+    return new SchemaAndValue(outputSchema, outputStruct);
+  }
 
-      final Map<String, String> columnMapping = new LinkedHashMap<>();
-
-      for (Field field : schema.fields()) {
-        final String newFieldName = this.config.from.to(this.config.to, field.name());
-        log.trace("processStruct() - Mapped '{}' to '{}'", field.name(), newFieldName);
-        columnMapping.put(field.name(), newFieldName);
-        builder.field(newFieldName, field.schema());
-      }
-
-      return new State(columnMapping, builder.build());
-    });
-
-    final Struct outputStruct = new Struct(state.schema);
-
-    for (Map.Entry<String, String> kvp : state.columnMapping.entrySet()) {
-      final Object value = input.get(kvp.getKey());
-      outputStruct.put(kvp.getValue(), value);
+  private Struct convertStruct(Schema inputSchema, Schema outputSchema, Struct input) {
+    final Struct struct = new Struct(outputSchema);
+    for (Field inputField : inputSchema.fields()) {
+      final int index = inputField.index();
+      final Field outputField = outputSchema.fields().get(index);
+      final Schema inputFieldSchema = inputField.schema();
+      final Schema outputFieldSchema = outputField.schema();
+      final Object value = convertValue(inputFieldSchema, outputFieldSchema, input.get(inputField));
+      struct.put(outputField, value);
     }
+    return struct;
+  }
 
-    return new SchemaAndValue(state.schema, outputStruct);
+  private Object convertValue(Schema inputFieldSchema, Schema outputFieldSchema, Object value) {
+    switch (outputFieldSchema.type()) {
+      case STRUCT: {
+        return convertStruct(inputFieldSchema, outputFieldSchema, (Struct) value);
+      }
+      case ARRAY: {
+        return convertArray(inputFieldSchema, outputFieldSchema, (List<Object>) value);
+      }
+    }
+    return value;
+  }
+
+  private Object convertArray(Schema inputFieldSchema, Schema outputFieldSchema, List<Object> value) {
+    final Schema inputSchema = inputFieldSchema.valueSchema();
+    final Schema outputSchema = outputFieldSchema.valueSchema();
+    switch (outputSchema.type()) {
+      case STRUCT: {
+        return value.stream().map(entry -> convertStruct(
+                inputSchema,
+                outputSchema,
+                (Struct) entry
+        )).collect(Collectors.toList());
+      }
+      case ARRAY: {
+        return value.stream().map(entry -> convertArray(
+                inputSchema,
+                outputSchema,
+                (List<Object>) entry
+        )).collect(Collectors.toList());
+      }
+    }
+    return value;
+  }
+
+  private Schema convertSchema(Schema inputSchema) {
+    switch (inputSchema.type()) {
+      case ARRAY: {
+        log.trace("convertSchema() - Recurse into array");
+        final SchemaBuilder builder = SchemaBuilder.array(convertSchema(inputSchema.valueSchema()));
+        if (inputSchema.isOptional()) {
+          builder.optional();
+        }
+        return builder.build();
+      }
+      case STRUCT: {
+        final SchemaBuilder builder = SchemaBuilder.struct();
+        if (!Strings.isNullOrEmpty(inputSchema.name())) {
+          builder.name(inputSchema.name());
+        }
+        if (inputSchema.isOptional()) {
+          builder.optional();
+        }
+        for (Field field : inputSchema.fields()) {
+          final String newFieldName = this.config.from.to(this.config.to, field.name());
+          log.trace("convertSchema() - Mapped '{}' to '{}'", field.name(), newFieldName);
+          builder.field(newFieldName, convertSchema(field.schema()));
+        }
+        return builder.build();
+      }
+    }
+    return inputSchema;
   }
 
   @Title("ChangeCase(Key)")

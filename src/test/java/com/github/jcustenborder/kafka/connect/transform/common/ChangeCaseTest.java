@@ -25,6 +25,10 @@ import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.transforms.Transformation;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.function.Function;
+
 import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,44 +41,51 @@ public abstract class ChangeCaseTest extends TransformationTest {
   @Test
   public void test() {
     this.transformation.configure(
-        ImmutableMap.of(
-            ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_UNDERSCORE.toString(),
-            ChangeCaseConfig.TO_CONFIG, CaseFormat.LOWER_UNDERSCORE.toString()
-        )
-    );
-    final Schema inputSchema = SchemaBuilder.struct()
-        .field("FIRST_NAME", Schema.STRING_SCHEMA)
-        .field("LAST_NAME", Schema.STRING_SCHEMA)
-        .build();
-    final Schema expectedSchema = SchemaBuilder.struct()
-        .field("first_name", Schema.STRING_SCHEMA)
-        .field("last_name", Schema.STRING_SCHEMA)
-        .build();
-    final Struct inputStruct = new Struct(inputSchema)
-        .put("FIRST_NAME", "test")
-        .put("LAST_NAME", "user");
-    final Struct expectedStruct = new Struct(expectedSchema)
-        .put("first_name", "test")
-        .put("last_name", "user");
+            ImmutableMap.of(ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_UNDERSCORE.toString(),
+                    ChangeCaseConfig.TO_CONFIG, CaseFormat.LOWER_UNDERSCORE.toString()));
+    final Schema inputSchema = makeSchema(CaseFormat.UPPER_UNDERSCORE);
+    final Schema expectedSchema = makeSchema(CaseFormat.LOWER_UNDERSCORE);
 
-    final SinkRecord inputRecord = new SinkRecord(
-        "topic",
-        1,
-        null,
-        null,
-        inputSchema,
-        inputStruct,
-        1L
-    );
+    final Struct inputStruct = makeStruct(inputSchema, CaseFormat.UPPER_UNDERSCORE);
+    final Struct expectedStruct = makeStruct(expectedSchema, CaseFormat.LOWER_UNDERSCORE);
+
+    final SinkRecord inputRecord = new SinkRecord("topic", 1, null, null, inputSchema, inputStruct, 1L);
     for (int i = 0; i < 50; i++) {
       final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
       assertNotNull(transformedRecord, "transformedRecord should not be null.");
       assertSchema(expectedSchema, transformedRecord.valueSchema());
       assertStruct(expectedStruct, (Struct) transformedRecord.value());
     }
-
   }
 
+  private Schema makeSchema(CaseFormat caseFormat) {
+    final Function<String, String> convert = s -> CaseFormat.LOWER_UNDERSCORE.to(caseFormat, s);
+    return SchemaBuilder.struct().field(convert.apply("contacts"),
+            SchemaBuilder.array(SchemaBuilder.struct()
+                    .field(convert.apply("contact"),
+                            SchemaBuilder.struct()
+                                    .field(convert.apply("first_name"), Schema.STRING_SCHEMA)
+                                    .field(convert.apply("last_name"), Schema.STRING_SCHEMA)
+                                    .build()
+                    ).build())
+    ).build();
+  }
+
+  private Struct makeStruct(Schema schema, CaseFormat caseFormat) {
+    final Function<String, String> convert = s -> CaseFormat.LOWER_UNDERSCORE.to(caseFormat, s);
+    final Schema contacts = schema.fields().get(0).schema().valueSchema();
+    final Schema contact = contacts.fields().get(0).schema();
+    return new Struct(schema).put(convert.apply("contacts"),
+            new ArrayList<>(
+                    Collections.singletonList(
+                            new Struct(contacts).put(convert.apply("contact"),
+                                    new Struct(contact)
+                                            .put(convert.apply("first_name"), "test")
+                                            .put(convert.apply("last_name"), "user"))
+                    )
+            )
+    );
+  }
 
   public static class ValueTest<R extends ConnectRecord<R>> extends ChangeCaseTest {
     protected ValueTest() {
