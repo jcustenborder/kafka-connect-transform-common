@@ -68,6 +68,52 @@ public abstract class BytesToStringTest extends TransformationTest {
     assertSchema(Schema.STRING_SCHEMA, outputRecord.valueSchema());
   }
 
+  @Test
+  public void nullBytes() throws UnsupportedEncodingException {
+    this.transformation.configure(
+            ImmutableMap.of()
+    );
+    final String expected =  null;
+    final SinkRecord inputRecord = new SinkRecord(
+            "topic",
+            1,
+            null,
+            null,
+            Schema.OPTIONAL_BYTES_SCHEMA,
+            expected,
+            1L
+    );
+
+    SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertEquals(expected, outputRecord.value());
+    assertSchema(Schema.OPTIONAL_STRING_SCHEMA, outputRecord.valueSchema());
+  }
+
+  @Test
+  public void nullStructFieldBytes() throws UnsupportedEncodingException {
+    this.transformation.configure(
+            ImmutableMap.of(BytesToStringConfig.FIELD_CONFIG, "bytes")
+    );
+    final String expected =  null;
+    Schema schema = SchemaBuilder.struct()
+            .field("bytes", Schema.OPTIONAL_BYTES_SCHEMA)
+            .build();
+    Struct struct = new Struct(schema)
+            .put("bytes", expected);
+
+    final SinkRecord inputRecord = new SinkRecord(
+            "topic",
+            1,
+            null,
+            null,
+            schema,
+            struct,
+            1L
+    );
+
+    SinkRecord outputRecord = this.transformation.apply(inputRecord);
+  }
+
   public static class ValueTest<R extends ConnectRecord<R>> extends BytesToStringTest {
     protected ValueTest() {
       super(false);

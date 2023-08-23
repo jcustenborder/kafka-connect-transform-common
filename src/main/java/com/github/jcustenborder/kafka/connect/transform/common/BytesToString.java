@@ -55,7 +55,9 @@ public abstract class BytesToString<R extends ConnectRecord<R>> extends BaseTran
   @Override
   protected SchemaAndValue processBytes(R record, Schema inputSchema, byte[] input) {
     final Schema outputSchema = inputSchema.isOptional() ? Schema.OPTIONAL_STRING_SCHEMA : Schema.STRING_SCHEMA;
-    final String output = new String(input, this.config.charset);
+    final String output =  input != null
+            ?  new String(input, this.config.charset)
+            : (String) inputSchema.defaultValue();
     return new SchemaAndValue(outputSchema, output);
   }
 
@@ -91,7 +93,12 @@ public abstract class BytesToString<R extends ConnectRecord<R>> extends BaseTran
     for (Field field : schema.fields()) {
       if (this.config.fields.contains(field.name())) {
         byte[] buffer = input.getBytes(field.name());
-        struct.put(field.name(), new String(buffer, this.config.charset));
+        struct.put(
+                field.name(),
+                buffer != null
+                  ?  new String(buffer, this.config.charset)
+                : field.schema().defaultValue()
+        );
       } else {
         struct.put(field.name(), input.get(field.name()));
       }
