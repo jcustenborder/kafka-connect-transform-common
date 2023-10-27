@@ -65,6 +65,10 @@ public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransfo
 
   private Struct convertStruct(Schema inputSchema, Schema outputSchema, Struct input) {
     final Struct struct = new Struct(outputSchema);
+
+    if (input == null)
+      return struct;
+
     for (Field inputField : inputSchema.fields()) {
       final int index = inputField.index();
       final Field outputField = outputSchema.fields().get(index);
