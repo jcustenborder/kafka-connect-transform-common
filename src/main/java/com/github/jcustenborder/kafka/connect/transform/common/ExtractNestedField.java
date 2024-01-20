@@ -71,7 +71,7 @@ public abstract class ExtractNestedField<R extends ConnectRecord<R>> extends Bas
       for (Field inputField : inputSchema.fields()) {
         builder.field(inputField.name(), inputField.schema());
       }
-      builder.field(this.config.innerFieldName, innerField.schema());
+      builder.field(this.config.outputFieldName, innerField.schema());
       return builder.build();
     });
     final Struct outputStruct = new Struct(outputSchema);
@@ -80,7 +80,7 @@ public abstract class ExtractNestedField<R extends ConnectRecord<R>> extends Bas
       outputStruct.put(inputField.name(), value);
     }
     final Object innerFieldValue = innerStruct.get(this.config.innerFieldName);
-    outputStruct.put(this.config.innerFieldName, innerFieldValue);
+    outputStruct.put(this.config.outputFieldName, innerFieldValue);
 
     return new SchemaAndValue(outputSchema, outputStruct);
 
