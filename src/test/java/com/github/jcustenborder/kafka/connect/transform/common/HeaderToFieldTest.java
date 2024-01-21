@@ -14,19 +14,16 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class HeaderToFieldTest {
   Transformation<SinkRecord> transformation;
 
-  @BeforeEach
-  public void before() {
-    this.transformation = new HeaderToField.Value<>();
-  }
-
-
   @Test
   public void apply() throws IOException {
+    this.transformation = new HeaderToField.Value<>();
+
     this.transformation.configure(
         ImmutableMap.of(HeaderToFieldConfig.HEADER_MAPPINGS_CONF, "applicationId:STRING")
     );
@@ -69,6 +66,46 @@ public class HeaderToFieldTest {
     SinkRecord actualRecord = this.transformation.apply(inputRecord);
     assertNotNull(actualRecord, "record should not be null.");
     assertStruct(expectedStruct, (Struct) actualRecord.value());
+  }
+
+  @Test
+  public void applyWithMap() throws IOException {
+    this.transformation = new HeaderToField.Key<>();
+
+    this.transformation.configure(
+            ImmutableMap.of(HeaderToFieldConfig.HEADER_MAPPINGS_CONF, "applicationId:STRING")
+    );
+
+    ConnectHeaders inputHeaders = new ConnectHeaders();
+    inputHeaders.addString("applicationId", "testing");
+
+    Schema inputSchema = SchemaBuilder.map(SchemaBuilder.STRING_SCHEMA, SchemaBuilder.OPTIONAL_STRING_SCHEMA)
+            .parameter("firstName", "example")
+            .parameter("lastName", "user")
+            .build();
+
+    Schema expectedSchema = SchemaBuilder.map(SchemaBuilder.STRING_SCHEMA, SchemaBuilder.OPTIONAL_STRING_SCHEMA)
+            .parameter("firstName", "example")
+            .parameter("lastName", "user")
+            .parameter("applicationId", "testing")
+            .build();
+
+    SinkRecord inputRecord = new SinkRecord(
+            "testing",
+            1,
+            null,
+            null,
+            expectedSchema.schema(),
+            inputSchema,
+            12345L,
+            123412351L,
+            TimestampType.NO_TIMESTAMP_TYPE,
+            inputHeaders
+    );
+
+    SinkRecord actualRecord = this.transformation.apply(inputRecord);
+    assertNotNull(actualRecord, "record should not be null.");
+    assertEquals(expectedSchema.parameters().size(), 3);
   }
 
 }
