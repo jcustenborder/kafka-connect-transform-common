@@ -21,11 +21,7 @@ import com.github.jcustenborder.kafka.connect.utils.config.Title;
 import com.google.common.base.Strings;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.ConnectRecord;
-import org.apache.kafka.connect.data.Field;
-import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.data.SchemaAndValue;
-import org.apache.kafka.connect.data.SchemaBuilder;
-import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.data.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
