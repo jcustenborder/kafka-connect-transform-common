@@ -132,15 +132,10 @@ public abstract class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyV
   @Override
   protected SchemaAndValue processMap(R record, Map<String, Object> input) {
 
-    // loop all mappings
     for (HeaderToFieldConfig.HeaderToFieldMapping mapping : this.config.mappings) {
       log.trace("conversion() - adding field '{}' with schema {}", mapping.field, mapping.schema);
 
-      // get value for record.headers() matching fieldname
-
       Header value = record.headers().lastWithName(mapping.header);
-
-      // if value exists
 
       if (null == value) {
         log.debug("processMap() - No header found for '{}'. Skipping.", mapping.header);
