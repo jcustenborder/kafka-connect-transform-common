@@ -43,7 +43,7 @@ import java.util.LinkedHashMap;
         "the desired range.  Can set a max precision and max scale, as well as require a positive scale.")
 @DocumentationNote("The Confluent AvroConverter uses a default precision of 64 which can be too large " +
     "for some database systems.")
-public class AdjustPrecisionAndScale<R extends ConnectRecord<R>> extends BaseKeyValueTransformation<R> {
+public abstract class AdjustPrecisionAndScale<R extends ConnectRecord<R>> extends BaseKeyValueTransformation<R> {
   private static final Logger log = LoggerFactory.getLogger(AdjustPrecisionAndScale.class);
 
   public AdjustPrecisionAndScale(boolean isKey) {
