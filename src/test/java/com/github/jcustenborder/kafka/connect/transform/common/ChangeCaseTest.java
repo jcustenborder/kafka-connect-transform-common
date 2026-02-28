@@ -27,8 +27,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 import java.util.function.Function;
 
+import static com.github.jcustenborder.kafka.connect.transform.common.GenericAssertions.assertMap;
 import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -56,6 +58,47 @@ public abstract class ChangeCaseTest extends TransformationTest {
       assertSchema(expectedSchema, transformedRecord.valueSchema());
       assertStruct(expectedStruct, (Struct) transformedRecord.value());
     }
+  }
+
+  @Test
+  public void testSchemaLess() {
+    this.transformation.configure(
+            ImmutableMap.of(ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_CAMEL.toString(),
+                    ChangeCaseConfig.TO_CONFIG, CaseFormat.LOWER_UNDERSCORE.toString()));
+
+    final Map<String, Object> input = ImmutableMap.of(
+            "Field", "first value",
+            "NestingField", ImmutableMap.of(
+                    "secondDepthField", "second depth",
+                    "secondDepthNestingField", ImmutableMap.of(
+                            "thirdDepthField", "third depth"
+                    )
+            )
+    );
+    final Map<String, Object> expected = ImmutableMap.of(
+            "field", "first value",
+            "nesting_field", ImmutableMap.of(
+                    "second_depth_field", "second depth",
+                    "second_depth_nesting_field", ImmutableMap.of(
+                            "third_depth_field", "third depth"
+                    )
+            )
+    );
+    final SinkRecord inputRecord = new SinkRecord(
+            TOPIC,
+            1,
+            null,
+            null,
+            null,
+            input,
+            1L
+    );
+
+    final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
+    assertNotNull(transformedRecord, "transformedRecord should not be null.");
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> actual = (Map<String, Object>) transformedRecord.value();
+    assertMap(expected, actual, "ChangeCase is not working on schema-less input, as expected");
   }
 
   private Schema makeSchema(CaseFormat caseFormat) {

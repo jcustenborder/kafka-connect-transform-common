@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,6 +56,27 @@ public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransfo
   }
 
   Map<Schema, Schema> schemaState = new HashMap<>();
+
+  @Override
+  protected SchemaAndValue processMap(R record, Map<String, Object> input) {
+    return new SchemaAndValue(null, convertMap(input));
+  }
+
+  private Object convertMap(Map<String, Object> input) {
+    final Map<String, Object> outputMap = new LinkedHashMap<>(input.size());
+
+    for (final String inputFieldName : input.keySet()) {
+      log.trace("processMap() - Processing field '{}'", inputFieldName);
+      final String outputFieldName = this.config.from.to(this.config.to, inputFieldName);
+      Object value = input.get(inputFieldName);
+      if (value instanceof Map) {
+        value = convertMap((Map<String, Object>) value);
+      }
+      outputMap.put(outputFieldName, value);
+    }
+
+    return outputMap;
+  }
 
   @Override
   protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
