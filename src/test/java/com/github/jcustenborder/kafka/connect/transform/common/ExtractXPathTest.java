@@ -218,14 +218,21 @@ public abstract class ExtractXPathTest extends TransformationTest {
     Struct struct = new Struct(schema).put("in", xml);
 
     final SinkRecord inputRecord = new SinkRecord("topic", 1, null, null, schema, struct, 1L);
-    SinkRecord outputRecord = this.transformation.apply(inputRecord);
-    assertNotNull(outputRecord);
 
-    final Struct actualStruct = (Struct) (isKey ? outputRecord.key() : outputRecord.value());
-    final Object out = actualStruct.get("out");
-    assertFalse(
-        String.valueOf(out).contains("SECRET-DO-NOT-LEAK"),
-        "External entity was resolved - XXE protection is not in effect");
+    // With the parser hardened, the DOCTYPE is rejected, so the entity is never expanded. The
+    // transform then either returns a record without the file contents, or fails the record
+    // (e.g. DataException). Either way the secret must never surface. On an unhardened parser
+    // apply() would succeed and the output would contain the file contents.
+    try {
+      SinkRecord outputRecord = this.transformation.apply(inputRecord);
+      String dump = String.valueOf(outputRecord.key()) + String.valueOf(outputRecord.value());
+      assertFalse(dump.contains("SECRET-DO-NOT-LEAK"),
+          "External entity was resolved - XXE protection is not in effect");
+    } catch (org.apache.kafka.connect.errors.DataException expected) {
+      // Record rejected because the malicious XML failed to parse - nothing was read.
+      assertFalse(String.valueOf(expected.getMessage()).contains("SECRET-DO-NOT-LEAK"),
+          "External entity contents leaked into the error");
+    }
   }
 
   public static class ValueTest<R extends ConnectRecord<R>> extends ExtractXPathTest {
