@@ -20,6 +20,7 @@ import com.github.jcustenborder.kafka.connect.utils.config.DocumentationTip;
 import com.github.jcustenborder.kafka.connect.utils.config.Title;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.ConnectRecord;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaAndValue;
@@ -35,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -79,6 +81,15 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(config.namespaceAware);
+      // Harden against XXE: reject DOCTYPE declarations and disable external entity/DTD
+      // resolution so untrusted XML cannot read local files or reach external URLs.
+      factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+      factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+      factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+      factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+      factory.setXIncludeAware(false);
+      factory.setExpandEntityReferences(false);
       builder = factory.newDocumentBuilder();
       xpath = XPathFactory.newInstance().newXPath();
       if (config.namespaceAware) {
@@ -97,7 +108,10 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
       DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS");
       writer = impl.createLSSerializer();
     } catch (Exception e) {
-      log.error("Unable to create transformer {} {}", e.getMessage(), e.toString());
+      // Fail closed: never run with a null/unhardened parser. Previously this exception was
+      // swallowed, which could leave the transform operating without the XXE protections above.
+      log.error("Unable to configure ExtractXPath transform", e);
+      throw new ConnectException("Unable to configure ExtractXPath transform", e);
     }
   }
   

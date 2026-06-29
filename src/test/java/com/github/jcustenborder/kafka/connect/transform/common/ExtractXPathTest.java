@@ -20,6 +20,7 @@ import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSc
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public abstract class ExtractXPathTest extends TransformationTest {
@@ -189,6 +190,42 @@ public abstract class ExtractXPathTest extends TransformationTest {
     );
     ExtractXPathConfig xpc = ((ExtractXPath) this.transformation).theConfig();
     assertEquals(xpc.namespaceAware, true);
+  }
+
+  @Test
+  public void xxeExternalEntityIsNotResolved() throws IOException {
+    // A crafted record references a local file via an external entity. With the parser hardened
+    // (DOCTYPE rejected), the file must NOT be read into the output. On an unhardened parser this
+    // would leak the file contents.
+    File secret = File.createTempFile("xxe-secret", ".txt");
+    java.nio.file.Files.write(secret.toPath(), "SECRET-DO-NOT-LEAK".getBytes());
+
+    String xml = "<?xml version=\"1.0\"?>\n"
+        + "<!DOCTYPE r [ <!ENTITY xxe SYSTEM \"file://" + secret.getAbsolutePath() + "\"> ]>\n"
+        + "<r>&xxe;</r>";
+
+    this.transformation.configure(
+      ImmutableMap.of(
+        ExtractXPathConfig.IN_FIELD_CONFIG, "in",
+        ExtractXPathConfig.OUT_FIELD_CONFIG, "out",
+        ExtractXPathConfig.XPATH_CONFIG, "//r")
+    );
+
+    Schema schema = SchemaBuilder.struct()
+      .name("testing")
+      .field("in", Schema.STRING_SCHEMA)
+      .build();
+    Struct struct = new Struct(schema).put("in", xml);
+
+    final SinkRecord inputRecord = new SinkRecord("topic", 1, null, null, schema, struct, 1L);
+    SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertNotNull(outputRecord);
+
+    final Struct actualStruct = (Struct) (isKey ? outputRecord.key() : outputRecord.value());
+    final Object out = actualStruct.get("out");
+    assertFalse(
+        String.valueOf(out).contains("SECRET-DO-NOT-LEAK"),
+        "External entity was resolved - XXE protection is not in effect");
   }
 
   public static class ValueTest<R extends ConnectRecord<R>> extends ExtractXPathTest {
