@@ -81,15 +81,22 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(config.namespaceAware);
-      // Harden against XXE: reject DOCTYPE declarations and disable external entity/DTD
-      // resolution so untrusted XML cannot read local files or reach external URLs.
-      factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-      factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-      factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-      factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-      factory.setXIncludeAware(false);
-      factory.setExpandEntityReferences(false);
+      if (config.secureProcessing) {
+        // Harden against XXE: reject DOCTYPE declarations and disable external entity/DTD
+        // resolution so untrusted XML cannot read local files or reach external URLs. This is
+        // the default; it can be turned off via secure.processing.enabled=false for trusted
+        // input that requires DTDs/entities.
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factory.setXIncludeAware(false);
+        factory.setExpandEntityReferences(false);
+      } else {
+        log.warn("secure.processing.enabled=false: XML External Entity (XXE) protections are "
+            + "disabled. Only use this with trusted XML input.");
+      }
       builder = factory.newDocumentBuilder();
       xpath = XPathFactory.newInstance().newXPath();
       if (config.namespaceAware) {

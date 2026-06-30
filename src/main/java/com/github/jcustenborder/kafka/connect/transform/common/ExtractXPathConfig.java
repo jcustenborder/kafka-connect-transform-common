@@ -35,6 +35,7 @@ public class ExtractXPathConfig extends AbstractConfig {
   public final boolean namespaceAware;
   public final List<String> prefixes;
   public final List<String> namespaces;
+  public final boolean secureProcessing;
 
   public static final String IN_FIELD_CONFIG = "input.field";
   public static final String IN_FIELD_DOC = "The input field containing the XML Document.";
@@ -46,6 +47,12 @@ public class ExtractXPathConfig extends AbstractConfig {
   public static final String NS_LIST_DOC = "A comma separated list of Namespaces corresponding to the prefixes";
   public static final String XPATH_CONFIG = "xpath";
   public static final String XPATH_DOC = "The XPath to apply to extract an element from the Document";
+  public static final String SECURE_PROCESSING_CONFIG = "secure.processing.enabled";
+  public static final String SECURE_PROCESSING_DOC = "When true (the default), the XML parser is "
+      + "hardened against XXE attacks: DOCTYPE declarations are rejected and external "
+      + "entity/DTD resolution is disabled. Set to false ONLY for trusted input that requires "
+      + "DTDs or entities - doing so re-enables XML External Entity (XXE) processing and must not "
+      + "be used with untrusted XML.";
 
 
 
@@ -54,6 +61,7 @@ public class ExtractXPathConfig extends AbstractConfig {
     this.inputField = getString(IN_FIELD_CONFIG);    
     this.outputField = getString(OUT_FIELD_CONFIG);
     this.xpath = getString(XPATH_CONFIG);
+    this.secureProcessing = getBoolean(SECURE_PROCESSING_CONFIG);
     String prefixString = getString(NS_PREFIX_CONFIG);
     String namespaceString = getString(NS_LIST_CONFIG);
     if (prefixString == null || prefixString.trim().length() == 0) {
@@ -76,7 +84,9 @@ public class ExtractXPathConfig extends AbstractConfig {
     .define(OUT_FIELD_CONFIG, ConfigDef.Type.STRING, null, ConfigDef.Importance.HIGH, OUT_FIELD_DOC)
     .define(XPATH_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, XPATH_DOC)
     .define(NS_LIST_CONFIG, ConfigDef.Type.STRING, null, ConfigDef.Importance.LOW, NS_LIST_DOC)
-    .define(NS_PREFIX_CONFIG, ConfigDef.Type.STRING, null, ConfigDef.Importance.LOW, NS_PREFIX_DOC);
+    .define(NS_PREFIX_CONFIG, ConfigDef.Type.STRING, null, ConfigDef.Importance.LOW, NS_PREFIX_DOC)
+    .define(SECURE_PROCESSING_CONFIG, ConfigDef.Type.BOOLEAN, true, ConfigDef.Importance.MEDIUM,
+        SECURE_PROCESSING_DOC);
   }
 
 }
