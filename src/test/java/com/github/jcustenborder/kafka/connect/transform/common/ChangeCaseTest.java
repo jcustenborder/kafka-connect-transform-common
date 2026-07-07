@@ -33,6 +33,7 @@ import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSc
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public abstract class ChangeCaseTest extends TransformationTest {
   protected ChangeCaseTest(boolean isKey) {
@@ -70,6 +71,20 @@ public abstract class ChangeCaseTest extends TransformationTest {
 
     assertNotNull(transformedRecord, "transformedRecord should not be null.");
     assertSchema(Schema.STRING_SCHEMA, isKey ? transformedRecord.keySchema() : transformedRecord.valueSchema());
+    assertEquals("first_name", isKey ? transformedRecord.key() : transformedRecord.value());
+  }
+
+  @Test
+  public void schemaLessString() {
+    this.transformation.configure(
+            ImmutableMap.of(ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_UNDERSCORE.toString(),
+                    ChangeCaseConfig.TO_CONFIG, CaseFormat.LOWER_UNDERSCORE.toString()));
+    final SinkRecord inputRecord = record(null, "FIRST_NAME");
+
+    final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
+
+    assertNotNull(transformedRecord, "transformedRecord should not be null.");
+    assertNull(isKey ? transformedRecord.keySchema() : transformedRecord.valueSchema());
     assertEquals("first_name", isKey ? transformedRecord.key() : transformedRecord.value());
   }
 
