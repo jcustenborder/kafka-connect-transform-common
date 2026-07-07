@@ -60,7 +60,11 @@ public abstract class ExtractNestedField<R extends ConnectRecord<R>> extends Bas
     final Struct innerStruct = input.getStruct(this.config.outerFieldName);
     final Schema outputSchema = this.schemaCache.computeIfAbsent(inputSchema, s -> {
 
-      final Field innerField = innerStruct.schema().field(this.config.innerFieldName);
+      final Field outerField = inputSchema.field(this.config.outerFieldName);
+      final Field innerField = outerField.schema().field(this.config.innerFieldName);
+      final Schema innerFieldSchema = outerField.schema().isOptional()
+          ? optional(innerField.schema())
+          : innerField.schema();
       final SchemaBuilder builder = SchemaBuilder.struct();
       if (!Strings.isNullOrEmpty(inputSchema.name())) {
         builder.name(inputSchema.name());
@@ -71,7 +75,7 @@ public abstract class ExtractNestedField<R extends ConnectRecord<R>> extends Bas
       for (Field inputField : inputSchema.fields()) {
         builder.field(inputField.name(), inputField.schema());
       }
-      builder.field(this.config.outputFieldName, innerField.schema());
+      builder.field(this.config.outputFieldName, innerFieldSchema);
       return builder.build();
     });
     final Struct outputStruct = new Struct(outputSchema);
@@ -79,11 +83,51 @@ public abstract class ExtractNestedField<R extends ConnectRecord<R>> extends Bas
       final Object value = input.get(inputField);
       outputStruct.put(inputField.name(), value);
     }
-    final Object innerFieldValue = innerStruct.get(this.config.innerFieldName);
+    final Object innerFieldValue = null == innerStruct ? null : innerStruct.get(this.config.innerFieldName);
     outputStruct.put(this.config.outputFieldName, innerFieldValue);
 
     return new SchemaAndValue(outputSchema, outputStruct);
 
+  }
+
+  private static Schema optional(Schema schema) {
+    if (schema.isOptional()) {
+      return schema;
+    }
+
+    final SchemaBuilder builder;
+    switch (schema.type()) {
+      case ARRAY:
+        builder = SchemaBuilder.array(schema.valueSchema());
+        break;
+      case MAP:
+        builder = SchemaBuilder.map(schema.keySchema(), schema.valueSchema());
+        break;
+      case STRUCT:
+        builder = SchemaBuilder.struct();
+        for (Field field : schema.fields()) {
+          builder.field(field.name(), field.schema());
+        }
+        break;
+      default:
+        builder = SchemaBuilder.type(schema.type());
+    }
+    if (!Strings.isNullOrEmpty(schema.name())) {
+      builder.name(schema.name());
+    }
+    if (null != schema.version()) {
+      builder.version(schema.version());
+    }
+    if (!Strings.isNullOrEmpty(schema.doc())) {
+      builder.doc(schema.doc());
+    }
+    if (null != schema.parameters() && !schema.parameters().isEmpty()) {
+      builder.parameters(schema.parameters());
+    }
+    if (null != schema.defaultValue()) {
+      builder.defaultValue(schema.defaultValue());
+    }
+    return builder.optional().build();
   }
 
 

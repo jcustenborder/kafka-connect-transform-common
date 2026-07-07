@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Test;
 import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class ExtractNestedFieldTest extends TransformationTest {
   protected ExtractNestedFieldTest(boolean isKey) {
@@ -87,6 +89,56 @@ public abstract class ExtractNestedFieldTest extends TransformationTest {
       assertSchema(expectedSchema, transformedRecord.valueSchema());
       assertStruct(expectedStruct, (Struct) transformedRecord.value());
     }
+  }
+
+  @Test
+  public void optionalOuterStructSetToNullProducesNullOutputField() {
+    this.transformation.configure(
+        ImmutableMap.of(
+            ExtractNestedFieldConfig.INNER_FIELD_NAME_CONF, "state",
+            ExtractNestedFieldConfig.OUTER_FIELD_NAME_CONF, "address",
+            ExtractNestedFieldConfig.OUTPUT_FIELD_NAME_CONF, "state"
+        )
+    );
+
+    final Schema innerSchema = SchemaBuilder.struct()
+        .name("Address")
+        .optional()
+        .field("city", Schema.STRING_SCHEMA)
+        .field("state", Schema.STRING_SCHEMA)
+        .build();
+    final Schema inputSchema = SchemaBuilder.struct()
+        .field("first_name", Schema.STRING_SCHEMA)
+        .field("last_name", Schema.STRING_SCHEMA)
+        .field("address", innerSchema)
+        .build();
+    final Schema expectedSchema = SchemaBuilder.struct()
+        .field("first_name", Schema.STRING_SCHEMA)
+        .field("last_name", Schema.STRING_SCHEMA)
+        .field("address", innerSchema)
+        .field("state", Schema.OPTIONAL_STRING_SCHEMA)
+        .build();
+    final Struct inputStruct = new Struct(inputSchema)
+        .put("first_name", "test")
+        .put("last_name", "developer")
+        .put("address", null);
+
+    final SinkRecord inputRecord = new SinkRecord(
+        "topic",
+        1,
+        null,
+        null,
+        inputSchema,
+        inputStruct,
+        1L
+    );
+
+    final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
+    assertNotNull(transformedRecord, "transformedRecord should not be null.");
+    assertSchema(expectedSchema, transformedRecord.valueSchema());
+    final Struct transformedStruct = (Struct) transformedRecord.value();
+    assertNull(transformedStruct.get("state"));
+    assertTrue(transformedRecord.valueSchema().field("state").schema().isOptional());
   }
 
 
