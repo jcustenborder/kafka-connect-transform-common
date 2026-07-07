@@ -103,28 +103,11 @@ public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTrans
 
   @Override
   protected SchemaAndValue processMap(R record, Map<String, Object> input) {
-    if (record.headers().isEmpty()) {
-      return new SchemaAndValue(null, input);
+    for (HeaderToFieldConfig.HeaderToFieldMapping mapping : this.config.mappings) {
+      Header header = record.headers().lastWithName(mapping.header);
+      Object fieldValue = null == header ? null : ConversionHandler.of(mapping.schema, mapping.header, mapping.field).convert(header);
+      input.put(mapping.field, fieldValue);
     }
-
-    Map<String, Object> headers = new HashMap<>();
-    if (this.config.mappings.isEmpty()) {
-      for (Header header: record.headers()) {
-        headers.put(header.key(), header.value());
-        break;
-      }
-    } else {
-      this.config.mappings.forEach(mapping -> {
-        for (Header header: record.headers()) {
-          if (header.key().equals(mapping.header)) {
-            headers.put(mapping.field, header.value());
-            break;
-          }
-        }
-      });
-    }
-
-    input.put("_headers", headers);
     return new SchemaAndValue(null, input);
   }
 
