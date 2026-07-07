@@ -12,8 +12,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class HeaderToFieldTest {
@@ -24,12 +26,10 @@ public class HeaderToFieldTest {
     this.transformation = new HeaderToField.Value<>();
   }
 
-
   @Test
   public void apply() throws IOException {
     this.transformation.configure(
-        ImmutableMap.of(HeaderToFieldConfig.HEADER_MAPPINGS_CONF, "applicationId:STRING")
-    );
+        ImmutableMap.of(HeaderToFieldConfig.HEADER_MAPPINGS_CONF, "applicationId:STRING"));
 
     ConnectHeaders inputHeaders = new ConnectHeaders();
     inputHeaders.addString("applicationId", "testing");
@@ -63,12 +63,98 @@ public class HeaderToFieldTest {
         12345L,
         123412351L,
         TimestampType.NO_TIMESTAMP_TYPE,
-        inputHeaders
-    );
+        inputHeaders);
 
     SinkRecord actualRecord = this.transformation.apply(inputRecord);
     assertNotNull(actualRecord, "record should not be null.");
     assertStruct(expectedStruct, (Struct) actualRecord.value());
+  }
+
+  @Test
+  public void applyMap() throws IOException {
+    this.transformation.configure(
+        ImmutableMap.of(HeaderToFieldConfig.HEADER_MAPPINGS_CONF, "applicationId:STRING"));
+
+    ConnectHeaders inputHeaders = new ConnectHeaders();
+    inputHeaders.addString("applicationId", "testing");
+
+    HashMap<String, Object> inputStruct = new HashMap<String, Object>() {
+      {
+        put("firstName", "example");
+        put("lastName", "user");
+      }
+    };
+
+    // expect map
+    HashMap<String, Object> expectedMap = new HashMap<String, Object>() {
+      {
+        put("firstName", "example");
+        put("lastName", "user");
+        put("applicationId", "testing");
+      }
+    };
+
+    SinkRecord inputRecord = new SinkRecord(
+        "testing",
+        1,
+        null,
+        null,
+        null,
+        inputStruct,
+        12345L,
+        123412351L,
+        TimestampType.NO_TIMESTAMP_TYPE,
+        inputHeaders);
+
+    SinkRecord actualRecord = this.transformation.apply(inputRecord);
+    assertNotNull(actualRecord, "record should not be null.");
+
+    // assert expectedMap and actualRecord have the same values
+
+    assertEquals(expectedMap, actualRecord.value());
+  }
+
+  @Test
+  public void applyMapWithoutHeader() throws IOException {
+    this.transformation.configure(
+        ImmutableMap.of(HeaderToFieldConfig.HEADER_MAPPINGS_CONF, "applicationId:STRING"));
+
+    ConnectHeaders inputHeaders = new ConnectHeaders();
+    inputHeaders.addString("anotherId", "testing");
+
+    HashMap<String, Object> inputStruct = new HashMap<String, Object>() {
+      {
+        put("firstName", "example");
+        put("lastName", "user");
+      }
+    };
+
+    // expect map
+    HashMap<String, Object> expectedMap = new HashMap<String, Object>() {
+      {
+        put("firstName", "example");
+        put("lastName", "user");
+      }
+    };
+
+    SinkRecord inputRecord = new SinkRecord(
+        "testing",
+        1,
+        null,
+        null,
+        null,
+        inputStruct,
+        12345L,
+        123412351L,
+        TimestampType.NO_TIMESTAMP_TYPE,
+        inputHeaders);
+
+    SinkRecord actualRecord = this.transformation.apply(inputRecord);
+    assertNotNull(actualRecord, "record should not be null.");
+
+    // assert expectedMap and actualRecord have the same values
+
+    assertEquals(expectedMap, actualRecord.value());
   }
 
 }

@@ -26,6 +26,7 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.header.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ import java.util.Map;
 @Title("HeaderToField")
 @Description("This transformation is used to copy the value of a header to a field in the key or " +
     "value of the record.")
-public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTransformation<R> {
+public abstract class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTransformation<R> {
   private static final Logger log = LoggerFactory.getLogger(HeaderToField.class);
 
   HeaderToFieldConfig config;
@@ -51,7 +52,6 @@ public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTrans
     return HeaderToFieldConfig.config();
   }
 
-
   static class Conversion {
     public final Schema newSchema;
     public final List<ConversionHandler> conversionHandlers;
@@ -62,6 +62,7 @@ public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTrans
     }
 
     public SchemaAndValue apply(ConnectRecord record, Struct input) {
+      log.trace("process() - Processing struct input = {}, record = {}", input, record);
       Struct result = new Struct(this.newSchema);
       for (Field field : input.schema().fields()) {
         String fieldName = field.name();
@@ -74,14 +75,30 @@ public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTrans
       return new SchemaAndValue(this.newSchema, result);
     }
 
+    public SchemaAndValue apply(ConnectRecord record, Map<Object, Object> input) {
+      log.trace("process() - Processing struct input = {}, record = {}", input, record);
+      Struct result = new Struct(this.newSchema);
+
+      // loop over the input map and copy the values to the result struct
+
+      for (Map.Entry<Object, Object> entry : input.entrySet()) {
+        String fieldName = entry.getKey().toString();
+        Object fieldValue = entry.getValue();
+        result.put(fieldName, fieldValue);
+      }
+
+      for (ConversionHandler handler : this.conversionHandlers) {
+        handler.convert(record, result);
+      }
+      return new SchemaAndValue(this.newSchema, result);
+    }
+
     public static Conversion of(Schema newSchema, List<ConversionHandler> conversionHandlers) {
       return new Conversion(newSchema, conversionHandlers);
     }
   }
 
-
   Map<Schema, Conversion> schemaCache = new HashMap<>();
-
 
   Conversion conversion(Schema schema) {
     return this.schemaCache.computeIfAbsent(schema, s -> {
@@ -100,11 +117,35 @@ public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTrans
     });
   }
 
-
   @Override
   protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
     Conversion conversion = conversion(inputSchema);
     return conversion.apply(record, input);
+  }
+
+  @Override
+  protected SchemaAndValue processMap(R record, Schema inputSchema, Map<Object, Object> input) {
+    Conversion conversion = conversion(inputSchema);
+    return conversion.apply(record, input);
+  }
+
+  @Override
+  protected SchemaAndValue processMap(R record, Map<String, Object> input) {
+
+    for (HeaderToFieldConfig.HeaderToFieldMapping mapping : this.config.mappings) {
+      log.trace("conversion() - adding field '{}' with schema {}", mapping.field, mapping.schema);
+
+      Header value = record.headers().lastWithName(mapping.header);
+
+      if (null == value) {
+        log.debug("processMap() - No header found for '{}'. Skipping.", mapping.header);
+        continue;
+      }
+
+      input.put(mapping.field, value.value());
+    }
+
+    return new SchemaAndValue(null, input);
   }
 
   @Override
