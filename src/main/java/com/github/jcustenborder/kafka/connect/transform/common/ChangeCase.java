@@ -93,6 +93,9 @@ public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransfo
   }
 
   private Object convertArray(Schema inputFieldSchema, Schema outputFieldSchema, List<Object> value) {
+    if (value == null)
+      return null;
+
     final Schema inputSchema = inputFieldSchema.valueSchema();
     final Schema outputSchema = outputFieldSchema.valueSchema();
     switch (outputSchema.type()) {

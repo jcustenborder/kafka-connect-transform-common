@@ -17,7 +17,6 @@ package com.github.jcustenborder.kafka.connect.transform.common;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableMap;
-import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
@@ -32,10 +31,16 @@ import java.util.function.Function;
 import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public abstract class ChangeCaseTest extends TransformationTest {
-  protected ChangeCaseTest(boolean isKey) {
-    super(isKey);
+public class ChangeCaseTest extends TransformationTest {
+  protected ChangeCaseTest() {
+    super(false);
+  }
+
+  @Override
+  protected Transformation<SinkRecord> create() {
+    return new ChangeCase.Value<>();
   }
 
   @Test
@@ -58,6 +63,23 @@ public abstract class ChangeCaseTest extends TransformationTest {
     }
   }
 
+  @Test
+  public void nullArrayValue() {
+    this.transformation.configure(
+            ImmutableMap.of(ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_UNDERSCORE.toString(),
+                    ChangeCaseConfig.TO_CONFIG, CaseFormat.LOWER_UNDERSCORE.toString()));
+    final Schema inputSchema = makeSchema(CaseFormat.UPPER_UNDERSCORE);
+    final Schema expectedSchema = makeSchema(CaseFormat.LOWER_UNDERSCORE);
+    final Struct inputStruct = new Struct(inputSchema).put("CONTACTS", null);
+    final SinkRecord inputRecord = new SinkRecord("topic", 1, null, null, inputSchema, inputStruct, 1L);
+
+    final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
+
+    assertNotNull(transformedRecord, "transformedRecord should not be null.");
+    assertSchema(expectedSchema, transformedRecord.valueSchema());
+    assertNull(((Struct) transformedRecord.value()).get("contacts"));
+  }
+
   private Schema makeSchema(CaseFormat caseFormat) {
     final Function<String, String> convert = s -> CaseFormat.LOWER_UNDERSCORE.to(caseFormat, s);
     return SchemaBuilder.struct().field(convert.apply("contacts"),
@@ -67,7 +89,7 @@ public abstract class ChangeCaseTest extends TransformationTest {
                                     .field(convert.apply("first_name"), Schema.STRING_SCHEMA)
                                     .field(convert.apply("last_name"), Schema.STRING_SCHEMA)
                                     .build()
-                    ).build())
+                    ).build()).optional()
     ).build();
   }
 
@@ -85,16 +107,5 @@ public abstract class ChangeCaseTest extends TransformationTest {
                     )
             )
     );
-  }
-
-  public static class ValueTest<R extends ConnectRecord<R>> extends ChangeCaseTest {
-    protected ValueTest() {
-      super(false);
-    }
-
-    @Override
-    protected Transformation<SinkRecord> create() {
-      return new ChangeCase.Value<>();
-    }
   }
 }
