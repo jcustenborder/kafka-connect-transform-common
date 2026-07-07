@@ -61,6 +61,23 @@ public abstract class ChangeCaseTest extends TransformationTest {
   }
 
   @Test
+  public void nullArrayValue() {
+    this.transformation.configure(
+            ImmutableMap.of(ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_UNDERSCORE.toString(),
+                    ChangeCaseConfig.TO_CONFIG, CaseFormat.LOWER_UNDERSCORE.toString()));
+    final Schema inputSchema = makeSchema(CaseFormat.UPPER_UNDERSCORE);
+    final Schema expectedSchema = makeSchema(CaseFormat.LOWER_UNDERSCORE);
+    final Struct inputStruct = new Struct(inputSchema).put("CONTACTS", null);
+    final SinkRecord inputRecord = record(inputSchema, inputStruct);
+
+    final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
+
+    assertNotNull(transformedRecord, "transformedRecord should not be null.");
+    assertSchema(expectedSchema, isKey ? transformedRecord.keySchema() : transformedRecord.valueSchema());
+    assertNull(((Struct) (isKey ? transformedRecord.key() : transformedRecord.value())).get("contacts"));
+  }
+
+  @Test
   public void string() {
     this.transformation.configure(
             ImmutableMap.of(ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_UNDERSCORE.toString(),
@@ -109,7 +126,7 @@ public abstract class ChangeCaseTest extends TransformationTest {
                                     .field(convert.apply("first_name"), Schema.STRING_SCHEMA)
                                     .field(convert.apply("last_name"), Schema.STRING_SCHEMA)
                                     .build()
-                    ).build())
+                    ).build()).optional()
     ).build();
   }
 
