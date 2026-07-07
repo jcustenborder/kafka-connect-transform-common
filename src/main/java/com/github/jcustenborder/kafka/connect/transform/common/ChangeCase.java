@@ -63,6 +63,11 @@ public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransfo
     return new SchemaAndValue(outputSchema, outputStruct);
   }
 
+  @Override
+  protected SchemaAndValue processString(R record, Schema inputSchema, String input) {
+    return new SchemaAndValue(inputSchema, input == null ? null : this.config.from.to(this.config.to, input));
+  }
+
   private Struct convertStruct(Schema inputSchema, Schema outputSchema, Struct input) {
     final Struct struct = new Struct(outputSchema);
 

@@ -31,6 +31,7 @@ import java.util.function.Function;
 
 import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
 import static com.github.jcustenborder.kafka.connect.utils.AssertStruct.assertStruct;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public abstract class ChangeCaseTest extends TransformationTest {
@@ -49,13 +50,39 @@ public abstract class ChangeCaseTest extends TransformationTest {
     final Struct inputStruct = makeStruct(inputSchema, CaseFormat.UPPER_UNDERSCORE);
     final Struct expectedStruct = makeStruct(expectedSchema, CaseFormat.LOWER_UNDERSCORE);
 
-    final SinkRecord inputRecord = new SinkRecord("topic", 1, null, null, inputSchema, inputStruct, 1L);
+    final SinkRecord inputRecord = record(inputSchema, inputStruct);
     for (int i = 0; i < 50; i++) {
       final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
       assertNotNull(transformedRecord, "transformedRecord should not be null.");
-      assertSchema(expectedSchema, transformedRecord.valueSchema());
-      assertStruct(expectedStruct, (Struct) transformedRecord.value());
+      assertSchema(expectedSchema, isKey ? transformedRecord.keySchema() : transformedRecord.valueSchema());
+      assertStruct(expectedStruct, (Struct) (isKey ? transformedRecord.key() : transformedRecord.value()));
     }
+  }
+
+  @Test
+  public void string() {
+    this.transformation.configure(
+            ImmutableMap.of(ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_UNDERSCORE.toString(),
+                    ChangeCaseConfig.TO_CONFIG, CaseFormat.LOWER_UNDERSCORE.toString()));
+    final SinkRecord inputRecord = record(Schema.STRING_SCHEMA, "FIRST_NAME");
+
+    final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
+
+    assertNotNull(transformedRecord, "transformedRecord should not be null.");
+    assertSchema(Schema.STRING_SCHEMA, isKey ? transformedRecord.keySchema() : transformedRecord.valueSchema());
+    assertEquals("first_name", isKey ? transformedRecord.key() : transformedRecord.value());
+  }
+
+  private SinkRecord record(Schema inputSchema, Object input) {
+    return new SinkRecord(
+            "topic",
+            1,
+            isKey ? inputSchema : null,
+            isKey ? input : null,
+            isKey ? null : inputSchema,
+            isKey ? null : input,
+            1L
+    );
   }
 
   private Schema makeSchema(CaseFormat caseFormat) {
@@ -85,6 +112,17 @@ public abstract class ChangeCaseTest extends TransformationTest {
                     )
             )
     );
+  }
+
+  public static class KeyTest<R extends ConnectRecord<R>> extends ChangeCaseTest {
+    protected KeyTest() {
+      super(true);
+    }
+
+    @Override
+    protected Transformation<SinkRecord> create() {
+      return new ChangeCase.Key<>();
+    }
   }
 
   public static class ValueTest<R extends ConnectRecord<R>> extends ChangeCaseTest {
