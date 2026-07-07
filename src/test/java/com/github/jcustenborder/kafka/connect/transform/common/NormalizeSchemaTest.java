@@ -310,7 +310,7 @@ public class NormalizeSchemaTest {
     assertEquals(1, outputNestedArray.size());
 
     // Verify the struct in array was correctly normalized
-    Struct outputArrayStruct = outputNestedArray.getFirst();
+    Struct outputArrayStruct = outputNestedArray.get(0);
     assertEquals("NestedField", outputArrayStruct.schema().name());
     assertEquals(2, outputArrayStruct.schema().version());
 

@@ -1,0 +1,96 @@
+name: Maven
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - run: mvn -B clean verify
+      - run: scripts/validate-cp-8.3.0-plugins.sh
+
+  release:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          snapshot_version="$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)"
+          if [[ ! "${snapshot_version}" =~ ^[0-9]+\.[0-9]+-SNAPSHOT$ ]]; then
+            echo "Root project version must be major.minor-SNAPSHOT. Found: ${snapshot_version}" >&2
+            exit 1
+          fi
+
+          base_version="${snapshot_version%-SNAPSHOT}"
+          git fetch --tags --force
+
+          latest_patch="$(
+            git tag --list "${base_version}.*" |
+              awk -v base="${base_version}" '
+                index($0, base ".") == 1 {
+                  patch = substr($0, length(base) + 2)
+                  if (patch ~ /^[0-9]+$/) print patch
+                }
+              ' |
+              sort -n |
+              tail -1
+          )"
+
+          if [[ -z "${latest_patch}" ]]; then
+            next_patch=0
+          else
+            next_patch=$((latest_patch + 1))
+          fi
+
+          release_version="${base_version}.${next_patch}"
+          if git rev-parse -q --verify "refs/tags/${release_version}" >/dev/null; then
+            echo "Release tag ${release_version} already exists." >&2
+            exit 1
+          fi
+
+          echo "version=${release_version}" >> "${GITHUB_OUTPUT}"
+          echo "Computed release version: ${release_version}"
+      - run: mvn -B versions:set -DgenerateBackupPoms=false -DnewVersion="${RELEASE_VERSION}"
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+      - run: mvn -B clean verify
+      - run: scripts/validate-cp-8.3.0-plugins.sh
+      - shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          package="target/components/packages/jcustenborder-kafka-connect-transform-common-${RELEASE_VERSION}.zip"
+          test -f "${package}"
+          gh release create "${RELEASE_VERSION}" "${package}" --target "${GITHUB_SHA}" --title "${RELEASE_VERSION}" --generate-notes

@@ -18,7 +18,6 @@ package com.github.jcustenborder.kafka.connect.transform.common;
 import com.github.jcustenborder.kafka.connect.utils.config.Description;
 import com.github.jcustenborder.kafka.connect.utils.config.Title;
 import org.apache.kafka.common.config.ConfigDef;
-import org.apache.kafka.common.utils.SystemTime;
 import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.transforms.Transformation;
@@ -29,7 +28,7 @@ import java.util.Map;
 @Description("This transformation is used to override the timestamp of the incoming record to the " +
     "time the record is being processed.")
 public class TimestampNow<R extends ConnectRecord<R>> implements Transformation<R> {
-  Time time = SystemTime.SYSTEM;
+  Time time = Time.SYSTEM;
 
   @Override
   public R apply(R record) {

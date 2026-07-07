@@ -37,7 +37,7 @@ import java.util.Map;
 @Title("HeaderToField")
 @Description("This transformation is used to copy the value of a header to a field in the key or " +
     "value of the record.")
-public class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTransformation<R> {
+public abstract class HeaderToField<R extends ConnectRecord<R>> extends BaseKeyValueTransformation<R> {
   private static final Logger log = LoggerFactory.getLogger(HeaderToField.class);
 
   HeaderToFieldConfig config;
