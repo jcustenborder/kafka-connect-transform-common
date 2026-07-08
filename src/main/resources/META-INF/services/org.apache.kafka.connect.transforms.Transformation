@@ -12,6 +12,10 @@ com.github.jcustenborder.kafka.connect.transform.common.ExtractTimestamp$Key
 com.github.jcustenborder.kafka.connect.transform.common.ExtractTimestamp$Value
 com.github.jcustenborder.kafka.connect.transform.common.ExtractXPath$Key
 com.github.jcustenborder.kafka.connect.transform.common.ExtractXPath$Value
+com.github.jcustenborder.kafka.connect.transform.common.GzipCompress$Key
+com.github.jcustenborder.kafka.connect.transform.common.GzipCompress$Value
+com.github.jcustenborder.kafka.connect.transform.common.GzipDecompress$Key
+com.github.jcustenborder.kafka.connect.transform.common.GzipDecompress$Value
 com.github.jcustenborder.kafka.connect.transform.common.HeaderToField$Key
 com.github.jcustenborder.kafka.connect.transform.common.HeaderToField$Value
 com.github.jcustenborder.kafka.connect.transform.common.LowerCaseTopic

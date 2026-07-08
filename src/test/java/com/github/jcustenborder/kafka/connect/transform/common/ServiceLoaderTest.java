@@ -42,6 +42,10 @@ public class ServiceLoaderTest {
       "com.github.jcustenborder.kafka.connect.transform.common.ExtractTimestamp$Value",
       "com.github.jcustenborder.kafka.connect.transform.common.ExtractXPath$Key",
       "com.github.jcustenborder.kafka.connect.transform.common.ExtractXPath$Value",
+      "com.github.jcustenborder.kafka.connect.transform.common.GzipCompress$Key",
+      "com.github.jcustenborder.kafka.connect.transform.common.GzipCompress$Value",
+      "com.github.jcustenborder.kafka.connect.transform.common.GzipDecompress$Key",
+      "com.github.jcustenborder.kafka.connect.transform.common.GzipDecompress$Value",
       "com.github.jcustenborder.kafka.connect.transform.common.HeaderToField$Key",
       "com.github.jcustenborder.kafka.connect.transform.common.HeaderToField$Value",
       "com.github.jcustenborder.kafka.connect.transform.common.LowerCaseTopic",
@@ -79,6 +83,8 @@ public class ServiceLoaderTest {
 
     assertTrue(actual.containsAll(EXPECTED_PROVIDERS), "Missing providers: " + missingProviders(actual));
     assertFalse(actual.contains("com.github.jcustenborder.kafka.connect.transform.common.AdjustPrecisionAndScale"));
+    assertFalse(actual.contains("com.github.jcustenborder.kafka.connect.transform.common.GzipCompress"));
+    assertFalse(actual.contains("com.github.jcustenborder.kafka.connect.transform.common.GzipDecompress"));
     assertFalse(actual.contains("com.github.jcustenborder.kafka.connect.transform.common.HeaderToField"));
     assertFalse(actual.contains("com.github.jcustenborder.kafka.connect.transform.common.SetMaximumPrecision"));
   }
