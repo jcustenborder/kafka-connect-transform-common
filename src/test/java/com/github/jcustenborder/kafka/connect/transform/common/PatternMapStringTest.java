@@ -25,6 +25,7 @@ import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.transforms.Transformation;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.github.jcustenborder.kafka.connect.transform.common.GenericAssertions.assertMap;
@@ -99,6 +100,84 @@ public abstract class PatternMapStringTest extends TransformationTest {
       "outname", "example_one",
       "lastname", "user.two"
     );
+
+    final Object key = isKey ? input : null;
+    final Object value = isKey ? null : input;
+    final Schema keySchema = null;
+    final Schema valueSchema = null;
+
+    final SinkRecord inputRecord = new SinkRecord(
+        TOPIC,
+        1,
+        keySchema,
+        key,
+        valueSchema,
+        value,
+        1234L
+    );
+    final SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertNotNull(outputRecord);
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> actual = (Map<String, Object>) (isKey ? outputRecord.key() : outputRecord.value());
+    assertMap(expected, actual, "");
+  }
+  @Test
+  public void schemaLessNullValueWithoutRename() {
+    this.transformation.configure(
+        ImmutableMap.of(
+          PatternMapStringConfig.SRC_FIELD_NAME_CONF, "firstname",
+          PatternMapStringConfig.DEST_FIELD_NAME_CONF, "firstname",
+          PatternMapStringConfig.VALUE_PATTERN_CONF, "\\.",
+          PatternMapStringConfig.VALUE_REPLACEMENT_CONF, "_"
+        )
+    );
+
+    final Map<String, Object> input = new LinkedHashMap<>();
+    input.put("firstname", null);
+    input.put("lastname", "user.two");
+
+    final Map<String, Object> expected = new LinkedHashMap<>();
+    expected.put("firstname", null);
+    expected.put("lastname", "user.two");
+
+    final Object key = isKey ? input : null;
+    final Object value = isKey ? null : input;
+    final Schema keySchema = null;
+    final Schema valueSchema = null;
+
+    final SinkRecord inputRecord = new SinkRecord(
+        TOPIC,
+        1,
+        keySchema,
+        key,
+        valueSchema,
+        value,
+        1234L
+    );
+    final SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertNotNull(outputRecord);
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> actual = (Map<String, Object>) (isKey ? outputRecord.key() : outputRecord.value());
+    assertMap(expected, actual, "");
+  }
+  @Test
+  public void schemaLessNullValueWithRename() {
+    this.transformation.configure(
+        ImmutableMap.of(
+          PatternMapStringConfig.SRC_FIELD_NAME_CONF, "inname",
+          PatternMapStringConfig.DEST_FIELD_NAME_CONF, "outname",
+          PatternMapStringConfig.VALUE_PATTERN_CONF, "\\.",
+          PatternMapStringConfig.VALUE_REPLACEMENT_CONF, "_"
+        )
+    );
+
+    final Map<String, Object> input = new LinkedHashMap<>();
+    input.put("inname", null);
+    input.put("lastname", "user.two");
+
+    final Map<String, Object> expected = new LinkedHashMap<>();
+    expected.put("inname", null);
+    expected.put("lastname", "user.two");
 
     final Object key = isKey ? input : null;
     final Object value = isKey ? null : input;
@@ -271,6 +350,105 @@ public abstract class PatternMapStringTest extends TransformationTest {
     Struct expectedStruct = new Struct(expectedSchema)
         .put("firstname", "this-has-multiple-tokens-to-replace")
         .put("lastname", "prefixeduser");
+
+    assertSchema(expectedSchema, actualSchema);
+    assertStruct(expectedStruct, actualStruct);
+  }
+
+  @Test
+  public void missingFieldWithoutRename() {
+    this.transformation.configure(
+            ImmutableMap.of(
+                    PatternMapStringConfig.SRC_FIELD_NAME_CONF, "fieldA",
+                    PatternMapStringConfig.DEST_FIELD_NAME_CONF, "fieldA",
+                    PatternMapStringConfig.VALUE_PATTERN_CONF, "from",
+                    PatternMapStringConfig.VALUE_REPLACEMENT_CONF, "to"
+            )
+    );
+
+    Schema inputSchema = SchemaBuilder.struct()
+            .name("testing")
+            .field("fieldA", Schema.OPTIONAL_STRING_SCHEMA)
+            .field("fieldB", Schema.STRING_SCHEMA);
+    Struct inputStruct = new Struct(inputSchema)
+            .put("fieldB", "valueB");
+
+    final Object key = isKey ? inputStruct : null;
+    final Object value = isKey ? null : inputStruct;
+    final Schema keySchema = isKey ? inputSchema : null;
+    final Schema valueSchema = isKey ? null : inputSchema;
+
+    final SinkRecord inputRecord = new SinkRecord(
+            TOPIC,
+            1,
+            keySchema,
+            key,
+            valueSchema,
+            value,
+            1234L
+    );
+    final SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertNotNull(outputRecord);
+
+    final Schema actualSchema = isKey ? outputRecord.keySchema() : outputRecord.valueSchema();
+    final Struct actualStruct = (Struct) (isKey ? outputRecord.key() : outputRecord.value());
+
+    final Schema expectedSchema = SchemaBuilder.struct()
+            .name("testing")
+            .field("fieldA", Schema.OPTIONAL_STRING_SCHEMA)
+            .field("fieldB", Schema.STRING_SCHEMA);
+    Struct expectedStruct = new Struct(expectedSchema)
+            .put("fieldB", "valueB");
+
+    assertSchema(expectedSchema, actualSchema);
+    assertStruct(expectedStruct, actualStruct);
+  }
+
+  @Test
+  public void missingFieldWithRename() {
+    this.transformation.configure(
+            ImmutableMap.of(
+                    PatternMapStringConfig.SRC_FIELD_NAME_CONF, "fieldA",
+                    PatternMapStringConfig.DEST_FIELD_NAME_CONF, "fieldC",
+                    PatternMapStringConfig.VALUE_PATTERN_CONF, "from",
+                    PatternMapStringConfig.VALUE_REPLACEMENT_CONF, "to"
+            )
+    );
+
+    Schema inputSchema = SchemaBuilder.struct()
+            .name("testing")
+            .field("fieldA", Schema.OPTIONAL_STRING_SCHEMA)
+            .field("fieldB", Schema.STRING_SCHEMA);
+    Struct inputStruct = new Struct(inputSchema)
+            .put("fieldB", "valueB");
+
+    final Object key = isKey ? inputStruct : null;
+    final Object value = isKey ? null : inputStruct;
+    final Schema keySchema = isKey ? inputSchema : null;
+    final Schema valueSchema = isKey ? null : inputSchema;
+
+    final SinkRecord inputRecord = new SinkRecord(
+            TOPIC,
+            1,
+            keySchema,
+            key,
+            valueSchema,
+            value,
+            1234L
+    );
+    final SinkRecord outputRecord = this.transformation.apply(inputRecord);
+    assertNotNull(outputRecord);
+
+    final Schema actualSchema = isKey ? outputRecord.keySchema() : outputRecord.valueSchema();
+    final Struct actualStruct = (Struct) (isKey ? outputRecord.key() : outputRecord.value());
+
+    final Schema expectedSchema = SchemaBuilder.struct()
+            .name("testing")
+            .field("fieldA", Schema.OPTIONAL_STRING_SCHEMA)
+            .field("fieldC", Schema.OPTIONAL_STRING_SCHEMA)
+            .field("fieldB", Schema.STRING_SCHEMA);
+    Struct expectedStruct = new Struct(expectedSchema)
+            .put("fieldB", "valueB");
 
     assertSchema(expectedSchema, actualSchema);
     assertStruct(expectedStruct, actualStruct);
