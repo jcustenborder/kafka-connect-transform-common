@@ -27,14 +27,13 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
-import org.apache.kafka.connect.data.Timestamp;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 
 @Title("TimestampNowField")
 @Description("This transformation is used to set a field with the current timestamp of the system running the " +
@@ -66,25 +65,20 @@ public abstract class TimestampNowField<R extends ConnectRecord<R>> extends Base
 
   Map<Schema, Schema> schemaCache = new HashMap<>();
 
-  static boolean isTimestampSchema(Schema schema) {
-    return (Timestamp.SCHEMA.type() == schema.type() && Timestamp.SCHEMA.name().equals(schema.name()));
-  }
-
   @Override
   protected SchemaAndValue processStruct(R record, Schema inputSchema, Struct input) {
-    Date timestamp = new Date(this.time.milliseconds());
-
+    Object timestamp = getFormattedTimestamp();
     Schema outputSchema = schemaCache.computeIfAbsent(inputSchema, schema -> {
       Collection<String> replaceFields = schema.fields().stream()
           .filter(f -> this.config.fields.contains(f.name()))
-          .filter(f -> !isTimestampSchema(f.schema()))
+          .filter(f -> !this.config.targetType.isMatchingSchema(f.schema()))
           .map(Field::name)
           .collect(Collectors.toList());
       SchemaBuilder builder = SchemaBuilders.of(schema, replaceFields);
       this.config.fields.forEach(timestampField -> {
         Field existingField = builder.field(timestampField);
         if (null == existingField) {
-          builder.field(timestampField, Timestamp.SCHEMA);
+          builder.field(timestampField, this.config.targetType.getSchema());
         }
       });
       return builder.build();
@@ -98,10 +92,18 @@ public abstract class TimestampNowField<R extends ConnectRecord<R>> extends Base
     return new SchemaAndValue(outputSchema, output);
   }
 
+  private Object getFormattedTimestamp() {
+    long desiredTimeInMillis = this.time.milliseconds();
+    if (config.addAmount > 0) {
+      desiredTimeInMillis += config.addAmount * config.addChronoUnit.getDuration().toMillis();
+    }
+    return this.config.targetType.getFormattedTimestamp(desiredTimeInMillis);
+  }
+
   @Override
   protected SchemaAndValue processMap(R record, Map<String, Object> input) {
     Map<String, Object> result = new LinkedHashMap<>(input);
-    Date timestamp = new Date(this.time.milliseconds());
+    Object timestamp = getFormattedTimestamp();
     this.config.fields.forEach(field -> result.put(field, timestamp));
     return new SchemaAndValue(null, result);
   }
