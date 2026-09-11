@@ -101,12 +101,6 @@ public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransfo
       final Object outputValue = this.config.passthroughFields.contains(inputKey)
           ? entry.getValue()
           : convertSchemalessValue(entry.getValue());
-      if (output.containsKey(outputKey)) {
-        log.warn(
-            "convertSchemalessMap() - Converted key '{}' (from '{}') collides with an "
-                + "existing key; the earlier value will be overwritten.",
-            outputKey, inputKey);
-      }
       output.put(outputKey, outputValue);
     }
     return output;
