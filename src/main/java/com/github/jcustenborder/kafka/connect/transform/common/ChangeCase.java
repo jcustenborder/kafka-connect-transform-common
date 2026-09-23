@@ -29,7 +29,9 @@ import org.apache.kafka.connect.data.Struct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -69,6 +71,50 @@ public abstract class ChangeCase<R extends ConnectRecord<R>> extends BaseTransfo
     final Schema outputSchema = this.schemaState.computeIfAbsent(inputSchema, schema -> convertSchema(schema));
     final Struct outputStruct = convertStruct(inputSchema, outputSchema, input);
     return new SchemaAndValue(outputSchema, outputStruct);
+  }
+
+  @Override
+  protected SchemaAndValue processMap(R record, Map<String, Object> input) {
+    return new SchemaAndValue(null, convertSchemalessMap(input));
+  }
+
+  @SuppressWarnings("unchecked")
+  private Object convertSchemalessValue(Object value) {
+    if (value instanceof Map) {
+      return convertSchemalessMap((Map<String, Object>) value);
+    }
+    if (value instanceof List) {
+      return convertSchemalessList((List<Object>) value);
+    }
+    return value;
+  }
+
+  private Map<String, Object> convertSchemalessMap(Map<String, Object> input) {
+    if (input == null) {
+      return null;
+    }
+    final Map<String, Object> output = new LinkedHashMap<>(input.size());
+    for (Map.Entry<String, Object> entry : input.entrySet()) {
+      final String inputKey = entry.getKey();
+      final String outputKey = inputKey == null ? null : this.config.from.to(this.config.to, inputKey);
+      log.trace("convertSchemalessMap() - Mapped '{}' to '{}'", inputKey, outputKey);
+      final Object outputValue = this.config.passthroughFields.contains(inputKey)
+          ? entry.getValue()
+          : convertSchemalessValue(entry.getValue());
+      output.put(outputKey, outputValue);
+    }
+    return output;
+  }
+
+  private List<Object> convertSchemalessList(List<Object> input) {
+    if (input == null) {
+      return null;
+    }
+    final List<Object> output = new ArrayList<>(input.size());
+    for (Object entry : input) {
+      output.add(convertSchemalessValue(entry));
+    }
+    return output;
   }
 
   @Override

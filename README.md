@@ -111,6 +111,18 @@ The format to move from
 
 
 
+##### `passthrough.fields`
+
+Field names (matched at any depth) whose values are left unchanged - the key is still converted, but its nested content is not. Use for map-like fields keyed by data (e.g. locale codes, labels).
+
+*Importance:* MEDIUM
+
+*Type:* LIST
+
+*Default Value:* []
+
+
+
 
 ## [ChangeTopicCase](https://jcustenborder.github.io/kafka-connect-documentation/projects/kafka-connect-transform-common/transformations/ChangeTopicCase.html)
 
