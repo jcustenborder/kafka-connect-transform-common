@@ -133,7 +133,7 @@ public abstract class ExtractTimestamp<R extends ConnectRecord<R>> implements Tr
 
     @Override
     public R apply(R r) {
-      final long timestamp = process(new SchemaAndValue(r.valueSchema(), r.value()));
+      final long timestamp = process(new SchemaAndValue(r.keySchema(), r.key()));
       return r.newRecord(
           r.topic(),
           r.kafkaPartition(),
