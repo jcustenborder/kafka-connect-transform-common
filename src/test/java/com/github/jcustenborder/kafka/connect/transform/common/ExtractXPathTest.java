@@ -13,6 +13,9 @@ import java.io.UnsupportedEncodingException;
 import java.io.File;
 import com.google.common.io.Files;
 import java.io.IOException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -267,6 +270,84 @@ public abstract class ExtractXPathTest extends TransformationTest {
     assertTrue(
         String.valueOf(actualStruct.get("out")).contains("INTERNAL-VALUE"),
         "DOCTYPE/internal entity should be processed when secure.processing.enabled=false");
+  }
+
+  @Test
+  public void hardeningAppliedWhenAnotherParserProviderIsRegistered() {
+    // A third-party JAXP provider registered for discovery (here via the system property; a
+    // META-INF/services entry on the classpath behaves the same) must not be used. This one
+    // rejects every feature, so configure() would fail if discovery picked it up.
+    final String key = "javax.xml.parsers.DocumentBuilderFactory";
+    final String previous = System.getProperty(key);
+    System.setProperty(key, UnsupportedFeaturesDocumentBuilderFactory.class.getName());
+    try {
+      this.transformation.configure(
+        ImmutableMap.of(
+          ExtractXPathConfig.IN_FIELD_CONFIG, "in",
+          ExtractXPathConfig.OUT_FIELD_CONFIG, "out",
+          ExtractXPathConfig.XPATH_CONFIG, "//r")
+      );
+    } finally {
+      if (previous == null) {
+        System.clearProperty(key);
+      } else {
+        System.setProperty(key, previous);
+      }
+    }
+
+    Schema schema = SchemaBuilder.struct()
+      .name("testing")
+      .field("in", Schema.STRING_SCHEMA)
+      .build();
+
+    // Still extracts from regular XML.
+    SinkRecord outputRecord = this.transformation.apply(
+        new SinkRecord("topic", 1, null, null, schema, new Struct(schema).put("in", "<r>ok</r>"), 1L));
+    final Struct actualStruct = (Struct) (isKey ? outputRecord.key() : outputRecord.value());
+    assertTrue(String.valueOf(actualStruct.get("out")).contains("<r>ok</r>"));
+
+    // Still rejects DOCTYPE declarations.
+    String xml = "<?xml version=\"1.0\"?>\n"
+        + "<!DOCTYPE r [ <!ENTITY foo \"INTERNAL-VALUE\"> ]>\n"
+        + "<r>&foo;</r>";
+    try {
+      outputRecord = this.transformation.apply(
+          new SinkRecord("topic", 1, null, null, schema, new Struct(schema).put("in", xml), 1L));
+      String dump = String.valueOf(outputRecord.key()) + String.valueOf(outputRecord.value());
+      assertFalse(dump.contains("INTERNAL-VALUE"), "DOCTYPE was processed - hardening is not in effect");
+    } catch (org.apache.kafka.connect.errors.DataException expected) {
+      // Record rejected because the DOCTYPE failed to parse.
+    }
+  }
+
+  /**
+   * Stands in for a third-party JAXP implementation that does not support the hardening features.
+   */
+  public static class UnsupportedFeaturesDocumentBuilderFactory extends DocumentBuilderFactory {
+    @Override
+    public DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
+      throw new ParserConfigurationException("Third-party parser should not be used");
+    }
+
+    @Override
+    public void setFeature(String name, boolean value) throws ParserConfigurationException {
+      throw new ParserConfigurationException("Feature not supported: " + name);
+    }
+
+    @Override
+    public boolean getFeature(String name) {
+      return false;
+    }
+
+    @Override
+    public void setAttribute(String name, Object value) {
+      throw new IllegalArgumentException("Attribute not supported: " + name);
+    }
+
+    @Override
+    public Object getAttribute(String name) {
+      return null;
+    }
   }
 
   public static class ValueTest<R extends ConnectRecord<R>> extends ExtractXPathTest {
