@@ -79,7 +79,9 @@ public abstract class ExtractXPath<R extends ConnectRecord<R>> extends BaseTrans
   public void configure(Map<String, ?> settings) {
     this.config = new ExtractXPathConfig(settings);
     try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      // Use the platform default parser rather than JAXP provider discovery, which can pick up
+      // a third-party implementation from the classpath that does not support the features below.
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newDefaultInstance();
       factory.setNamespaceAware(config.namespaceAware);
       if (config.secureProcessing) {
         // Harden against XXE: reject DOCTYPE declarations and disable external entity/DTD
