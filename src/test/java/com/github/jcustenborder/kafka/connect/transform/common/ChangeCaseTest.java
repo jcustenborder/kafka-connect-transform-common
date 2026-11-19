@@ -27,6 +27,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import static com.github.jcustenborder.kafka.connect.utils.AssertSchema.assertSchema;
@@ -103,6 +106,166 @@ public abstract class ChangeCaseTest extends TransformationTest {
     assertNotNull(transformedRecord, "transformedRecord should not be null.");
     assertNull(isKey ? transformedRecord.keySchema() : transformedRecord.valueSchema());
     assertEquals("first_name", isKey ? transformedRecord.key() : transformedRecord.value());
+  }
+
+  @Test
+  public void schemaLessMapPassthroughField() {
+    this.transformation.configure(
+            ImmutableMap.of(ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_CAMEL.toString(),
+                    ChangeCaseConfig.TO_CONFIG, CaseFormat.LOWER_CAMEL.toString(),
+                    ChangeCaseConfig.PASSTHROUGH_FIELDS_CONFIG, "Labels,Name"));
+
+    final Map<String, Object> labels = new LinkedHashMap<>();
+    labels.put("EM_SwappedNames", "False");
+    labels.put("OriginalId", "abc123");
+
+    final Map<String, Object> name = new LinkedHashMap<>();
+    name.put("ru", "Ivan");
+    name.put("en", "Ivan");
+
+    final Map<String, Object> input = new LinkedHashMap<>();
+    input.put("Id", "1");
+    input.put("Labels", labels);
+    input.put("Name", name);
+
+    final SinkRecord inputRecord = record(null, input);
+    final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
+
+    assertNotNull(transformedRecord, "transformedRecord should not be null.");
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> output =
+            (Map<String, Object>) (isKey ? transformedRecord.key() : transformedRecord.value());
+
+    // top-level field names recased
+    assertEquals("1", output.get("id"));
+    assertNull(output.get("Id"), "old top-level key should be gone.");
+
+    // passthrough field names recased, but their nested data keys preserved verbatim
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> outLabels = (Map<String, Object>) output.get("labels");
+    assertNotNull(outLabels, "passthrough field key should be recased to 'labels'.");
+    assertEquals("False", outLabels.get("EM_SwappedNames"));
+    assertEquals("abc123", outLabels.get("OriginalId"));
+
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> outName = (Map<String, Object>) output.get("name");
+    assertNotNull(outName, "passthrough field key should be recased to 'name'.");
+    assertEquals("Ivan", outName.get("ru"));
+    assertEquals("Ivan", outName.get("en"));
+  }
+
+  @Test
+  public void schemaLessDeepNesting() {
+    this.transformation.configure(
+            ImmutableMap.of(ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_CAMEL.toString(),
+                    ChangeCaseConfig.TO_CONFIG, CaseFormat.LOWER_CAMEL.toString(),
+                    ChangeCaseConfig.PASSTHROUGH_FIELDS_CONFIG, "DataLabels"));
+
+    // list of maps
+    final Map<String, Object> point = new LinkedHashMap<>();
+    point.put("MinuteOfPoint", 3);
+    point.put("TimerDirection", "up");
+    final List<Object> pointInfos = new ArrayList<>(Collections.singletonList(point));
+
+    // map nested in map + a passthrough map deep in the tree
+    final Map<String, Object> passLabels = new LinkedHashMap<>();
+    passLabels.put("EM_SwappedNames", "False");
+    final Map<String, Object> timer = new LinkedHashMap<>();
+    timer.put("CurrentTime", 12);
+    timer.put("DataLabels", passLabels);
+
+    // list of lists of maps
+    final Map<String, Object> deep = new LinkedHashMap<>();
+    deep.put("CompetitorId", "c1");
+    final List<Object> innerList = new ArrayList<>(Collections.singletonList(deep));
+    final List<Object> outerList = new ArrayList<>(Collections.singletonList(innerList));
+
+    final Map<String, Object> input = new LinkedHashMap<>();
+    input.put("EventId", "e1");
+    input.put("PointInfos", pointInfos);
+    input.put("Timer", timer);
+    input.put("CompetitorInfos", outerList);
+
+    final SinkRecord inputRecord = record(null, input);
+    final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
+
+    assertNotNull(transformedRecord, "transformedRecord should not be null.");
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> out =
+            (Map<String, Object>) (isKey ? transformedRecord.key() : transformedRecord.value());
+
+    assertEquals("e1", out.get("eventId"));
+
+    // list of maps -> nested keys renamed
+    @SuppressWarnings("unchecked")
+    final List<Object> outPoints = (List<Object>) out.get("pointInfos");
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> outPoint = (Map<String, Object>) outPoints.get(0);
+    assertEquals(3, outPoint.get("minuteOfPoint"));
+    assertEquals("up", outPoint.get("timerDirection"));
+
+    // map nested in map -> renamed; passthrough map key renamed but its keys preserved
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> outTimer = (Map<String, Object>) out.get("timer");
+    assertEquals(12, outTimer.get("currentTime"));
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> outLabels = (Map<String, Object>) outTimer.get("dataLabels");
+    assertNotNull(outLabels, "passthrough field key should be recased to 'dataLabels'.");
+    assertEquals("False", outLabels.get("EM_SwappedNames"));
+
+    // list of lists of maps -> deepest keys renamed
+    @SuppressWarnings("unchecked")
+    final List<Object> outOuter = (List<Object>) out.get("competitorInfos");
+    @SuppressWarnings("unchecked")
+    final List<Object> outInner = (List<Object>) outOuter.get(0);
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> outDeep = (Map<String, Object>) outInner.get(0);
+    assertEquals("c1", outDeep.get("competitorId"));
+  }
+
+  @Test
+  public void schemaLessMap() {
+    this.transformation.configure(
+            ImmutableMap.of(ChangeCaseConfig.FROM_CONFIG, CaseFormat.UPPER_CAMEL.toString(),
+                    ChangeCaseConfig.TO_CONFIG, CaseFormat.LOWER_CAMEL.toString()));
+
+    final Map<String, Object> nested = new LinkedHashMap<>();
+    nested.put("FirstName", "test");
+    nested.put("LastName", "user");
+
+    final Map<String, Object> arrayEntry = new LinkedHashMap<>();
+    arrayEntry.put("StreetName", "main");
+
+    final Map<String, Object> input = new LinkedHashMap<>();
+    input.put("TransactionId", "abc");
+    input.put("AmountBreakdown", nested);
+    input.put("Addresses", new ArrayList<>(Collections.singletonList(arrayEntry)));
+
+    final SinkRecord inputRecord = record(null, input);
+
+    final SinkRecord transformedRecord = this.transformation.apply(inputRecord);
+
+    assertNotNull(transformedRecord, "transformedRecord should not be null.");
+    assertNull(isKey ? transformedRecord.keySchema() : transformedRecord.valueSchema());
+
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> output =
+            (Map<String, Object>) (isKey ? transformedRecord.key() : transformedRecord.value());
+
+    assertEquals("abc", output.get("transactionId"));
+
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> outNested = (Map<String, Object>) output.get("amountBreakdown");
+    assertNotNull(outNested, "nested map should be renamed and present.");
+    assertEquals("test", outNested.get("firstName"));
+    assertEquals("user", outNested.get("lastName"));
+
+    @SuppressWarnings("unchecked")
+    final List<Object> outArray = (List<Object>) output.get("addresses");
+    assertNotNull(outArray, "nested array should be renamed and present.");
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> outArrayEntry = (Map<String, Object>) outArray.get(0);
+    assertEquals("main", outArrayEntry.get("streetName"));
   }
 
   private SinkRecord record(Schema inputSchema, Object input) {
